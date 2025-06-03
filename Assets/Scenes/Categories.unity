@@ -5105,7 +5105,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.9282
+      value: 0.709
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.z
@@ -5192,12 +5192,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0.23859
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.1522
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062090, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_Camera
@@ -5424,6 +5428,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1208757003}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3032334164665928405, guid: 66d40221d132d04499855da9ce315f20, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1364055693}
     - targetCorrespondingSourceObject: {fileID: 3032334164805062083, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1852270622}
@@ -5453,10 +5460,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ff54a6648e71f4b818a8342af2810739, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1364055693 stripped
+--- !u!114 &1364055693
 MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 1435055189130710449, guid: 66d40221d132d04499855da9ce315f20, type: 3}
-  m_PrefabInstance: {fileID: 1364055689}
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1257756836}
   m_Enabled: 1
@@ -5464,6 +5472,21 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1a2d7d89889b4d94fa1f8d6fe49788e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Target: {fileID: 0}
+  m_TargetOffset: {x: 0, y: 0, z: 0.5}
+  m_FollowInLocalSpace: 0
+  m_ApplyTargetInLocalSpace: 0
+  m_MovementSpeed: 6
+  m_MovementSpeedVariancePercentage: 0.25
+  m_SnapOnEnable: 1
+  m_PositionFollowMode: 1
+  m_MinDistanceAllowed: 0.01
+  m_MaxDistanceAllowed: 0.3
+  m_TimeUntilThresholdReachesMaxDistance: 3
+  m_RotationFollowMode: 1
+  m_MinAngleAllowed: 0.1
+  m_MaxAngleAllowed: 5
+  m_TimeUntilThresholdReachesMaxAngle: 3
 --- !u!1 &1470893327
 GameObject:
   m_ObjectHideFlags: 0
@@ -8110,6 +8133,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2073726594}
+  - component: {fileID: 2073726595}
   m_Layer: 0
   m_Name: UI
   m_TagString: Untagged
@@ -8137,6 +8161,33 @@ Transform:
   - {fileID: 404762413}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2073726595
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2073726593}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a2d7d89889b4d94fa1f8d6fe49788e8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Target: {fileID: 0}
+  m_TargetOffset: {x: 0, y: 0, z: 0.5}
+  m_FollowInLocalSpace: 0
+  m_ApplyTargetInLocalSpace: 0
+  m_MovementSpeed: 6
+  m_MovementSpeedVariancePercentage: 0.25
+  m_SnapOnEnable: 1
+  m_PositionFollowMode: 1
+  m_MinDistanceAllowed: 0.01
+  m_MaxDistanceAllowed: 0.3
+  m_TimeUntilThresholdReachesMaxDistance: 3
+  m_RotationFollowMode: 1
+  m_MinAngleAllowed: 0.1
+  m_MaxAngleAllowed: 5
+  m_TimeUntilThresholdReachesMaxAngle: 3
 --- !u!1 &2120083480 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 7980650391616948280, guid: 66d40221d132d04499855da9ce315f20, type: 3}
@@ -8237,11 +8288,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6431073450290906435, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.557
+      value: 0.375
       objectReference: {fileID: 0}
     - target: {fileID: 6431073450290906435, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.222
+      value: -0.08
       objectReference: {fileID: 0}
     - target: {fileID: 9119545848555334746, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_OnARPlaneFeatureChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
@@ -8318,7 +8369,7 @@ PrefabInstance:
     - target: {fileID: 9196333150773566786, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_GoalPanelLazyFollow
       value: 
-      objectReference: {fileID: 1364055693}
+      objectReference: {fileID: 0}
     - target: {fileID: 9196333150773566786, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_StepButtonTextField
       value: 

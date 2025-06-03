@@ -6800,7 +6800,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Content: {fileID: 2075950430}
-  m_Horizontal: 1
+  m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 1
   m_Elasticity: 0.1
@@ -7072,15 +7072,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0.4
+      value: -0.23
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.9
+      value: 0.95
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0.5
+      value: 0.3
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalRotation.w
@@ -7176,7 +7176,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 512
+      value: 542.1667
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_SizeDelta.y
@@ -7184,11 +7184,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0.0743
+      value: 0.0856
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -0.0041
+      value: -0.0042
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062090, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_Camera
@@ -7378,8 +7378,7 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents:
-    - {fileID: 1435055189130710449, guid: 66d40221d132d04499855da9ce315f20, type: 3}
+    m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4971885943758680261, guid: 66d40221d132d04499855da9ce315f20, type: 3}
     - {fileID: 3032334163513271980, guid: 66d40221d132d04499855da9ce315f20, type: 3}
@@ -10140,7 +10139,7 @@ MonoBehaviour:
   m_HandleRect: {fileID: 1659976994}
   m_Direction: 2
   m_Value: 1.0000011
-  m_Size: 0.48565122
+  m_Size: 0.4856512
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -11113,7 +11112,19 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 2014480711}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: UnityEngine.Object, UnityEngine
+        m_MethodName: 
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &2014480711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -11495,7 +11506,7 @@ MonoBehaviour:
     m_Bottom: 24
   m_ChildAlignment: 1
   m_Spacing: 16
-  m_ChildForceExpandWidth: 0
+  m_ChildForceExpandWidth: 1
   m_ChildForceExpandHeight: 1
   m_ChildControlWidth: 0
   m_ChildControlHeight: 0
@@ -11514,7 +11525,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_HorizontalFit: 0
+  m_HorizontalFit: 1
   m_VerticalFit: 2
 --- !u!1001 &2101220871
 PrefabInstance:
@@ -11857,6 +11868,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 709168687020557665, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
+      propertyPath: m_TrackingMode
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1447839107455911567, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_OcclusionShaderMode
       value: 2
