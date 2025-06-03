@@ -3,16 +3,28 @@ using TMPro;
 
 public class ExperienceSelector : MonoBehaviour
 {
-    public TextMeshProUGUI descriptionText;
-
     [TextArea]
-    public string[] descriptions;
+    public string descriptionText;  // Texte à afficher quand on clique
+    
+    public TextMeshProUGUI descriptionTarget; // Zone de texte à modifier
 
-    public void SelectExperience(int index)
+    void Awake()
     {
-        if (index >= 0 && index < descriptions.Length)
+        if (descriptionTarget == null)
         {
-            descriptionText.text = descriptions[index];
+            Debug.LogWarning($"[{nameof(ExperienceSelector)}] descriptionTarget non assigné sur {gameObject.name}.");
+        }
+    }
+
+    public void ShowDescription(string desciription)
+    {
+        if (descriptionTarget != null)
+        {
+            descriptionTarget.text = desciription;
+        }
+        else
+        {
+            Debug.LogWarning($"[{nameof(ExperienceSelector)}] descriptionTarget est null.");
         }
     }
 }
