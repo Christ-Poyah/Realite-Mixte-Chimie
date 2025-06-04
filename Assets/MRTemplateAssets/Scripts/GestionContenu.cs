@@ -1,46 +1,86 @@
 using UnityEngine;
-using TMPro;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
-[System.Serializable]
-public class Experience
+public class DynamicButtonCreator : MonoBehaviour
 {
-    public string titre;
-    public int temps;
-    public string description;
-}
+    public GameObject buttonPrefab;
+    public Transform parentTransform;
+    public float spacing = 10f;
 
-public class ExperienceManager : MonoBehaviour
-{
-    public GameObject experiencePrefab; // Le prefab que tu as créé
-    public Transform contentParent;     // Le Content du ScrollView
-    public List<Experience> experiences;
+    [System.Serializable]
+    private class ExperimentData
+    {
+        public string description;
+        public string duration;
+    }
+
+    private readonly List<ExperimentData> experiments = new List<ExperimentData>
+    {
+        new ExperimentData { description = "Expérience avec les alcanes", duration = "10 min" },
+        new ExperimentData { description = "Réaction des alcools", duration = "15 min" },
+        new ExperimentData { description = "Synthèse des esters", duration = "20 min" },
+        new ExperimentData { description = "Oxydation des aldéhydes", duration = "12 min" },
+        new ExperimentData { description = "Polymérisation", duration = "25 min" }
+    };
 
     void Start()
     {
-        ChargerExperiences();
-        AfficherExperiences();
+        SetupScrollViewContent();
+        CreateButtons();
     }
 
-    void ChargerExperiences()
+    void SetupScrollViewContent()
     {
-        experiences = new List<Experience>
-        {
-            new Experience { titre = "Réaction acide-base", temps = 10, description = "Vinaigre + bicarbonate" },
-            new Experience { titre = "Flamme colorée", temps = 5, description = "Coloration par sels métalliques" },
-            new Experience { titre = "Osmose avec pomme de terre", temps = 15, description = "Diffusion de l'eau dans un tube de pomme de terre" },
-            new Experience { titre = "Chromatographie", temps = 20, description = "Séparation des encres par capillarité" },
-        };
-    }
+        if (parentTransform == null) return;
 
-    void AfficherExperiences()
-    {
-        foreach (var exp in experiences)
+        var layoutGroup = parentTransform.GetComponent<VerticalLayoutGroup>() ?? parentTransform.gameObject.AddComponent<VerticalLayoutGroup>();
+        layoutGroup.spacing = spacing;
+        layoutGroup.childAlignment = TextAnchor.UpperLeft;
+        layoutGroup.childControlWidth = true;
+        layoutGroup.childControlHeight = true;
+        layoutGroup.childForceExpandWidth = true;
+        layoutGroup.childForceExpandHeight = false;
+
+        var sizeFitter = parentTransform.GetComponent<ContentSizeFitter>() ?? parentTransform.gameObject.AddComponent<ContentSizeFitter>();
+        sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+        var contentRect = parentTransform.GetComponent<RectTransform>();
+        if (contentRect != null)
         {
-            GameObject go = Instantiate(experiencePrefab, contentParent);
-            go.transform.Find("TextTitre").GetComponent<TMP_Text>().text = exp.titre;
-            go.transform.Find("TextTemps").GetComponent<TMP_Text>().text = exp.temps + " min";
-            go.transform.Find("TextDescription").GetComponent<TMP_Text>().text = exp.description;
+            contentRect.anchorMin = new Vector2(0, 1);
+            contentRect.anchorMax = new Vector2(1, 1);
+            contentRect.pivot = new Vector2(0.5f, 1);
+            contentRect.anchoredPosition = Vector2.zero;
+            contentRect.sizeDelta = new Vector2(0, contentRect.sizeDelta.y);
         }
+    }
+
+    void CreateButtons()
+    {
+        if (buttonPrefab == null || parentTransform == null) return;
+
+        for (int i = 0; i < experiments.Count; i++)
+        {
+            var newButton = Instantiate(buttonPrefab, parentTransform);
+
+            var leftText = newButton.transform.Find("LeftText")?.GetComponent<Text>();
+            var rightText = newButton.transform.Find("RightText")?.GetComponent<Text>();
+
+            if (leftText != null) leftText.text = experiments[i].description;
+            if (rightText != null) rightText.text = experiments[i].duration;
+
+            var buttonComponent = newButton.GetComponent<Button>();
+            int index = i;
+            if (buttonComponent != null)
+            {
+                buttonComponent.onClick.AddListener(() => OnButtonClick(index));
+            }
+        }
+    }
+
+    void OnButtonClick(int index)
+    {
+        Debug.Log($"Bouton cliqué : {experiments[index].description} ({experiments[index].duration})");
     }
 }
