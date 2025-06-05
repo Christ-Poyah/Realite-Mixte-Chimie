@@ -7072,11 +7072,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.x
+<<<<<<< Updated upstream
       value: -0.27
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.y
       value: 1.35
+=======
+      value: -0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.9282
+>>>>>>> Stashed changes
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164665928404, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_LocalPosition.z
@@ -7188,11 +7196,19 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_AnchoredPosition.x
+<<<<<<< Updated upstream
       value: 0.0856
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_AnchoredPosition.y
       value: -0.0042
+=======
+      value: 0.19
+      objectReference: {fileID: 0}
+    - target: {fileID: 3032334164805062089, guid: 66d40221d132d04499855da9ce315f20, type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0.1522
+>>>>>>> Stashed changes
       objectReference: {fileID: 0}
     - target: {fileID: 3032334164805062090, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_Camera
@@ -7696,7 +7712,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1454711151
 RectTransform:
   m_ObjectHideFlags: 0
@@ -9178,7 +9194,11 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
+<<<<<<< Updated upstream
   m_AnchoredPosition: {x: 0.49841252, y: -0.00401}
+=======
+  m_AnchoredPosition: {x: 0.67, y: 0.1522}
+>>>>>>> Stashed changes
   m_SizeDelta: {x: 512, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1720310333
@@ -10112,8 +10132,13 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1659976995}
   m_HandleRect: {fileID: 1659976994}
   m_Direction: 2
+<<<<<<< Updated upstream
   m_Value: 1.0000012
   m_Size: 0.48565122
+=======
+  m_Value: 1.0000014
+  m_Size: 0.58981234
+>>>>>>> Stashed changes
   m_NumberOfSteps: 0
   m_OnValueChanged:
     m_PersistentCalls:
@@ -11964,7 +11989,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6431073450482620770, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_LocalPosition.y
+<<<<<<< Updated upstream
       value: 1.36144
+=======
+      value: 1.52
+      objectReference: {fileID: 0}
+    - target: {fileID: 9087330898344277017, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
+      propertyPath: m_FirstSelected
+      value: 
+>>>>>>> Stashed changes
       objectReference: {fileID: 0}
     - target: {fileID: 9119545848555334746, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_OnARPlaneFeatureChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
