@@ -1883,8 +1883,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &349654345
 GameObject:
   m_ObjectHideFlags: 0
@@ -4199,8 +4199,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &693526594
 GameObject:
   m_ObjectHideFlags: 0
@@ -5448,8 +5448,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!224 &871650553 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5300434771290044448, guid: 899e415972c7641a4b5b2dfc27e8d613, type: 3}
@@ -6026,8 +6026,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &987651765
 GameObject:
   m_ObjectHideFlags: 0
@@ -6269,16 +6269,28 @@ PrefabInstance:
     m_TransformParent: {fileID: 2073726594}
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.99116
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.99116
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
+      propertyPath: m_LocalScale.z
+      value: 1.1027646
+      objectReference: {fileID: 0}
+    - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.16
+      value: -0.13478
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -1.28
+      value: -1.228
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 5.51
+      value: 5.5519
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
       propertyPath: m_LocalRotation.w
@@ -6307,6 +6319,22 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: -5477749408508380018, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 53.732998
+      objectReference: {fileID: 0}
+    - target: {fileID: -5477749408508380018, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0.0000000084126
+      objectReference: {fileID: 0}
+    - target: {fileID: -5477749408508380018, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.71
+      objectReference: {fileID: 0}
+    - target: {fileID: -5477749408508380018, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.000000011199
       objectReference: {fileID: 0}
     - target: {fileID: -4683669308469848369, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -6915,8 +6943,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1092536025
 GameObject:
   m_ObjectHideFlags: 0
@@ -9210,8 +9238,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1406928449 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6965058723825942968, guid: 899e415972c7641a4b5b2dfc27e8d613, type: 3}
@@ -9229,8 +9257,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1414190883
 GameObject:
   m_ObjectHideFlags: 0
@@ -9556,8 +9584,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1452529495 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 1700632255236584042, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
@@ -10311,8 +10339,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1551572655
 GameObject:
   m_ObjectHideFlags: 0
@@ -11348,8 +11376,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1732561081 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -8391222552659086748, guid: 44dd5cb2aa580483480ff813a6af01ca, type: 3}
@@ -11929,8 +11957,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1789525107
 GameObject:
   m_ObjectHideFlags: 0
@@ -12816,8 +12844,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!114 &1891673207 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 592033903724724223, guid: b6d57cedc6a73c94aad8ce006a26b41b, type: 3}
@@ -12846,8 +12874,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &1912136552
 GameObject:
   m_ObjectHideFlags: 0
@@ -13754,8 +13782,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 787bc071f31d74b1384a86faaf6a4535, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  descriptionText: 
-  descriptionTarget: {fileID: 943778418}
+  descriptionText: {fileID: 0}
+  descriptions: []
 --- !u!1 &2134068175
 GameObject:
   m_ObjectHideFlags: 0
@@ -14044,12 +14072,16 @@ PrefabInstance:
       value: 0.03
       objectReference: {fileID: 0}
     - target: {fileID: 6373159657460180795, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.57485
+      objectReference: {fileID: 0}
+    - target: {fileID: 6373159657460180795, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.61
       objectReference: {fileID: 0}
     - target: {fileID: 6373159657460180795, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.73
+      value: 1.4273
       objectReference: {fileID: 0}
     - target: {fileID: 6373159657460180795, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_LocalPosition.z
