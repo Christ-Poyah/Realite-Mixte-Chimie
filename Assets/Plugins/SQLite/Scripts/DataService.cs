@@ -66,20 +66,73 @@ public class DataService  {
 
 	public void CreateDB()
 	{
+		// Création des tables existantes
 		_connection.DropTable<Experience>();
 		_connection.CreateTable<Experience>();
 
+		// Création de la nouvelle table Experiment
+		_connection.DropTable<Experiment>();
+		_connection.CreateTable<Experiment>();
+
+		// Insertion des données existantes Experience (si nécessaire)
 		_connection.InsertAll(new[]{
 			new Experience{
 				Id_Experiences = 1,
 				Id_Categorie = 1,
 				Libelle = "Perez",
 			},
-
 		});
-		
+
+		// Insertion des expériences chimiques
+		InsertDefaultExperiments();
 	}
 
+	private void InsertDefaultExperiments()
+	{
+		var experiments = new[]
+		{
+			new Experiment
+			{
+				Description = "Expérience avec les alcanes",
+				Duration = "10 min",
+				Category = "Chimie Organique",
+				IsActive = true
+			},
+			new Experiment
+			{
+				Description = "Réaction des alcools",
+				Duration = "15 min",
+				Category = "Chimie Organique",
+				IsActive = true
+			},
+			new Experiment
+			{
+				Description = "Synthèse des esters",
+				Duration = "20 min",
+				Category = "Chimie Organique",
+				IsActive = true
+			},
+			new Experiment
+			{
+				Description = "Oxydation des aldéhydes",
+				Duration = "12 min",
+				Category = "Chimie Organique",
+				IsActive = true
+			},
+			new Experiment
+			{
+				Description = "Polymérisation",
+				Duration = "25 min",
+				Category = "Chimie des Polymères",
+				IsActive = true
+			}
+		};
+
+		_connection.InsertAll(experiments);
+		Debug.Log($"Inserted {experiments.Length} experiments into database");
+	}
+
+	// Méthodes existantes pour Experience
 	public IEnumerable<Experience> GetExperiences(){
 		return _connection.Table<Experience>();
 	}
@@ -100,5 +153,42 @@ public class DataService  {
 		};
 		_connection.Insert (p);
 		return p;
+	}
+
+	// Nouvelles méthodes pour Experiment
+	public IEnumerable<Experiment> GetAllExperiments()
+	{
+		return _connection.Table<Experiment>().Where(x => x.IsActive == true);
+	}
+
+	public IEnumerable<Experiment> GetExperimentsByCategory(string category)
+	{
+		return _connection.Table<Experiment>().Where(x => x.Category == category && x.IsActive == true);
+	}
+
+	public Experiment GetExperimentById(int id)
+	{
+		return _connection.Table<Experiment>().Where(x => x.Id == id).FirstOrDefault();
+	}
+
+	public int AddExperiment(Experiment experiment)
+	{
+		return _connection.Insert(experiment);
+	}
+
+	public int UpdateExperiment(Experiment experiment)
+	{
+		return _connection.Update(experiment);
+	}
+
+	public int DeleteExperiment(int id)
+	{
+		var experiment = GetExperimentById(id);
+		if (experiment != null)
+		{
+			experiment.IsActive = false;
+			return _connection.Update(experiment);
+		}
+		return 0;
 	}
 }
