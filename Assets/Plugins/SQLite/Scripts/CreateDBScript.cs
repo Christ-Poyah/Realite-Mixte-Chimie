@@ -13,17 +13,14 @@ public class CreateDBScript : MonoBehaviour {
 
     private void StartSync()
     {
-        var ds = new DataService("tempDatabase.db");
+        var ds = new DataService("existing.db");
         ds.CreateDB();
         
-        var people = ds.GetPersons ();
+        var people = ds.GetExperiences();
         ToConsole (people);
-        people = ds.GetPersonsNamedRoberto ();
-        ToConsole("Searching for Roberto ...");
-        ToConsole (people); 
     }
 	
-	private void ToConsole(IEnumerable<Person> people){
+	private void ToConsole(IEnumerable<Experience> people){
 		foreach (var person in people) {
 			ToConsole(person.ToString());
 		}

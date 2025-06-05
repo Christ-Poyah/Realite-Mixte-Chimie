@@ -10,21 +10,12 @@ public class ExistingDBScript : MonoBehaviour {
 	void Start () {
 		var ds = new DataService ("existing.db");
 		//ds.CreateDB ();
-		var people = ds.GetPersons ();
+		var people = ds.GetExperiences ();
 		ToConsole (people);
-
-		people = ds.GetPersonsNamedRoberto ();
-		ToConsole("Searching for Roberto ...");
-		ToConsole (people);
-
-		ds.CreatePerson ();
-		ToConsole("New person has been created");
-		var p = ds.GetJohnny ();
-		ToConsole(p.ToString());
 
 	}
 	
-	private void ToConsole(IEnumerable<Person> people){
+	private void ToConsole(IEnumerable<Experience> people){
 		foreach (var person in people) {
 			ToConsole(person.ToString());
 		}

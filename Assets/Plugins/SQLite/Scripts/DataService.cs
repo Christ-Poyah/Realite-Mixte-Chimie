@@ -64,37 +64,39 @@ public class DataService  {
 
 	}
 
-	public void CreateDB(){
-		_connection.DropTable<Experiences> ();
-		_connection.CreateTable<Experiences> ();
+	public void CreateDB()
+	{
+		_connection.DropTable<Experience>();
+		_connection.CreateTable<Experience>();
 
-		_connection.InsertAll (new[]{
-			new Experiences{
+		_connection.InsertAll(new[]{
+			new Experience{
 				Id_Experiences = 1,
 				Id_Categorie = 1,
 				Libelle = "Perez",
 			},
-			
+
 		});
+		
 	}
 
-	public IEnumerable<Person> GetPersons(){
-		return _connection.Table<Person>();
+	public IEnumerable<Experience> GetExperiences(){
+		return _connection.Table<Experience>();
 	}
 
-	public IEnumerable<Person> GetPersonsNamedRoberto(){
-		return _connection.Table<Person>().Where(x => x.Name == "Roberto");
+	public IEnumerable<Experience> GetExperienceX(){
+		return _connection.Table<Experience>().Where(x => x.Libelle == "Roberto");
 	}
 
-	public Person GetJohnny(){
-		return _connection.Table<Person>().Where(x => x.Name == "Johnny").FirstOrDefault();
+	public Experience GetJohnny(){
+		return _connection.Table<Experience>().Where(x => x.Libelle == "Johnny").FirstOrDefault();
 	}
 
-	public Person CreatePerson(){
-		var p = new Person{
-				Name = "Johnny",
-				Surname = "Mnemonic",
-				Age = 21
+	public Experience CreateExperiences(){
+		var p = new Experience{
+				Id_Categorie = 1,
+				Libelle = "Mnemonic",
+				Id_Experiences = 1
 		};
 		_connection.Insert (p);
 		return p;

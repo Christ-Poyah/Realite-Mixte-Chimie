@@ -1,6 +1,6 @@
 using SQLite4Unity3d;
 
-public class Experiences  {
+public class Experience  {
 
 	[PrimaryKey, AutoIncrement]
 	public int Id_Experiences { get; set; }
