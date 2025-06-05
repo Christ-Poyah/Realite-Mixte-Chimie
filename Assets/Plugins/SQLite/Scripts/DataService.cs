@@ -65,34 +65,16 @@ public class DataService  {
 	}
 
 	public void CreateDB(){
-		_connection.DropTable<Person> ();
-		_connection.CreateTable<Person> ();
+		_connection.DropTable<Experiences> ();
+		_connection.CreateTable<Experiences> ();
 
 		_connection.InsertAll (new[]{
-			new Person{
-				Id = 1,
-				Name = "Tom",
-				Surname = "Perez",
-				Age = 56
+			new Experiences{
+				Id_Experiences = 1,
+				Id_Categorie = 1,
+				Libelle = "Perez",
 			},
-			new Person{
-				Id = 2,
-				Name = "Fred",
-				Surname = "Arthurson",
-				Age = 16
-			},
-			new Person{
-				Id = 3,
-				Name = "John",
-				Surname = "Doe",
-				Age = 25
-			},
-			new Person{
-				Id = 4,
-				Name = "Roberto",
-				Surname = "Huertas",
-				Age = 37
-			}
+			
 		});
 	}
 

@@ -1,20 +1,22 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro; // Ajout de l'espace de nom pour TextMeshPro
 using System.Collections.Generic;
 
 public class DynamicButtonCreator : MonoBehaviour
 {
-    public GameObject buttonPrefab;
-    public Transform parentTransform;
-    public float spacing = 10f;
+    public GameObject buttonPrefab; // Préfab du bouton avec TextMeshPro
+    public Transform parentTransform; // Parent pour les boutons (ex : ScrollView Content)
+    public float spacing = 10f; // Espacement entre les boutons
 
     [System.Serializable]
     private class ExperimentData
     {
-        public string description;
-        public string duration;
+        public string description; // Description de l'expérience
+        public string duration; // Durée de l'expérience
     }
 
+    // Liste des expériences chimiques (conforme au cahier des charges)
     private readonly List<ExperimentData> experiments = new List<ExperimentData>
     {
         new ExperimentData { description = "Expérience avec les alcanes", duration = "10 min" },
@@ -32,8 +34,13 @@ public class DynamicButtonCreator : MonoBehaviour
 
     void SetupScrollViewContent()
     {
-        if (parentTransform == null) return;
+        if (parentTransform == null)
+        {
+            Debug.LogError("ParentTransform non assigné !");
+            return;
+        }
 
+        // Configuration du VerticalLayoutGroup
         var layoutGroup = parentTransform.GetComponent<VerticalLayoutGroup>() ?? parentTransform.gameObject.AddComponent<VerticalLayoutGroup>();
         layoutGroup.spacing = spacing;
         layoutGroup.childAlignment = TextAnchor.UpperLeft;
@@ -42,9 +49,11 @@ public class DynamicButtonCreator : MonoBehaviour
         layoutGroup.childForceExpandWidth = true;
         layoutGroup.childForceExpandHeight = false;
 
+        // Configuration du ContentSizeFitter
         var sizeFitter = parentTransform.GetComponent<ContentSizeFitter>() ?? parentTransform.gameObject.AddComponent<ContentSizeFitter>();
         sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
+        // Configuration du RectTransform
         var contentRect = parentTransform.GetComponent<RectTransform>();
         if (contentRect != null)
         {
@@ -58,23 +67,38 @@ public class DynamicButtonCreator : MonoBehaviour
 
     void CreateButtons()
     {
-        if (buttonPrefab == null || parentTransform == null) return;
+        if (buttonPrefab == null || parentTransform == null)
+        {
+            Debug.LogError("ButtonPrefab ou ParentTransform non assigné !");
+            return;
+        }
 
         for (int i = 0; i < experiments.Count; i++)
         {
+            // Instanciation du bouton
             var newButton = Instantiate(buttonPrefab, parentTransform);
 
-            var leftText = newButton.transform.Find("LeftText")?.GetComponent<Text>();
-            var rightText = newButton.transform.Find("RightText")?.GetComponent<Text>();
+            // Recherche des composants TextMeshProUGUI
+            var leftText = newButton.transform.Find("LeftText")?.GetComponent<TextMeshProUGUI>();
+            var rightText = newButton.transform.Find("RightText")?.GetComponent<TextMeshProUGUI>();
 
+            // Mise à jour des textes
             if (leftText != null) leftText.text = experiments[i].description;
-            if (rightText != null) rightText.text = experiments[i].duration;
+            else Debug.LogWarning($"LeftText (TextMeshProUGUI) non trouvé sur le bouton {i}");
 
+            if (rightText != null) rightText.text = experiments[i].duration;
+            else Debug.LogWarning($"RightText (TextMeshProUGUI) non trouvé sur le bouton {i}");
+
+            // Configuration du clic sur le bouton
             var buttonComponent = newButton.GetComponent<Button>();
             int index = i;
             if (buttonComponent != null)
             {
                 buttonComponent.onClick.AddListener(() => OnButtonClick(index));
+            }
+            else
+            {
+                Debug.LogWarning($"Composant Button non trouvé sur le bouton {i}");
             }
         }
     }
@@ -82,5 +106,6 @@ public class DynamicButtonCreator : MonoBehaviour
     void OnButtonClick(int index)
     {
         Debug.Log($"Bouton cliqué : {experiments[index].description} ({experiments[index].duration})");
+        // Ajouter ici la logique pour lancer l'expérience sélectionnée (par exemple, charger une scène Unity spécifique)
     }
 }
