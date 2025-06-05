@@ -16,11 +16,11 @@ public class CreateDBScript : MonoBehaviour {
         var ds = new DataService("existing.db");
         ds.CreateDB();
         
-        var people = ds.GetExperiences();
+        var people = ds.GetAllExperiences(); // Corrigé : GetExperiences() -> GetAllExperiences()
         ToConsole (people);
     }
 	
-	private void ToConsole(IEnumerable<Experience> people){
+	private void ToConsole(IEnumerable<ExperienceChimie> people){
 		foreach (var person in people) {
 			ToConsole(person.ToString());
 		}

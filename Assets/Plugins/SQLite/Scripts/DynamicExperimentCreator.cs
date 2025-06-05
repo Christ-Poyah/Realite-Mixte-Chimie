@@ -3,6 +3,7 @@ using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 public class DynamicExperimentCreator : MonoBehaviour
 {
@@ -13,35 +14,80 @@ public class DynamicExperimentCreator : MonoBehaviour
     
     [Header("Settings")]
     public float spacing = 10f; // Espacement entre les boutons
-    public bool createDBOnStart = false; // Cocher pour recréer la DB au démarrage
+    public float initializationDelay = 0.5f; // Délai d'attente pour l'initialisation de la DB
     
     private DataService dataService;
-    private List<Experiment> currentExperiments;
+    private List<ExperienceChimie> currentExperiments;
+    private bool isInitialized = false;
 
     void Start()
     {
-        InitializeDatabase();
-        SetupScrollViewContent();
-        LoadAndCreateButtons();
+        StartCoroutine(InitializeWithDelay());
+    }
+    
+    private IEnumerator InitializeWithDelay()
+    {
+        ToDebug("Waiting for DatabaseManager initialization...");
+        
+        // Attendre que le DatabaseManager soit prêt
+        yield return new WaitForSeconds(initializationDelay);
+        
+        ToDebug("Checking for DatabaseManager instance...");
+        
+        // Vérifier si le DatabaseManager existe
+        if (DatabaseManager.Instance == null)
+        {
+            ToDebug("ERROR: DatabaseManager not found! Please add DatabaseManager to scene.");
+            yield break;
+        }
+        
+        ToDebug("DatabaseManager found! Checking if database is ready...");
+        
+        // Attendre que la base de données soit prête
+        int attempts = 0;
+        const int maxAttempts = 10;
+        
+        while (!DatabaseManager.Instance.IsDatabaseReady() && attempts < maxAttempts)
+        {
+            ToDebug($"Waiting for database... Attempt {attempts + 1}/{maxAttempts}");
+            yield return new WaitForSeconds(0.5f);
+            attempts++;
+        }
+        
+        if (!DatabaseManager.Instance.IsDatabaseReady())
+        {
+            ToDebug("ERROR: Database not ready after maximum attempts");
+            yield break;
+        }
+        
+        ToDebug("Database is ready! Starting initialization...");
+        InitializeExperimentCreator();
     }
 
-    void InitializeDatabase()
+    void InitializeExperimentCreator()
     {
         try
         {
-            dataService = new DataService("existing.db");
+            // Obtenir le service de données depuis le DatabaseManager
+            dataService = DatabaseManager.Instance.GetDataService();
             
-            if (createDBOnStart)
+            if (dataService == null)
             {
-                dataService.CreateDB();
-                ToDebug("Database created and populated with default experiments");
+                ToDebug("ERROR: DataService is null");
+                return;
             }
             
-            ToDebug("Database connection established");
+            ToDebug("DataService obtained successfully");
+            
+            SetupScrollViewContent();
+            LoadAndCreateButtons();
+            
+            isInitialized = true;
+            ToDebug("DynamicExperimentCreator initialized successfully");
         }
         catch (System.Exception e)
         {
-            ToDebug($"Error initializing database: {e.Message}");
+            ToDebug($"Error initializing DynamicExperimentCreator: {e.Message}");
         }
     }
 
@@ -80,21 +126,17 @@ public class DynamicExperimentCreator : MonoBehaviour
 
     void LoadAndCreateButtons()
     {
-        if (dataService == null)
-        {
-            ToDebug("Error: DataService not initialized");
-            return;
-        }
+        if (!ValidateInitialization()) return;
 
         try
         {
             // Charger les expériences depuis la base de données
-            currentExperiments = dataService.GetAllExperiments().ToList();
+            currentExperiments = dataService.GetAllExperiences().ToList();
             ToDebug($"Loaded {currentExperiments.Count} experiments from database");
 
             if (currentExperiments.Count == 0)
             {
-                ToDebug("No experiments found in database. Consider setting createDBOnStart to true.");
+                ToDebug("No experiments found in database. The database might be empty.");
                 return;
             }
 
@@ -123,41 +165,41 @@ public class DynamicExperimentCreator : MonoBehaviour
             
             // Instanciation du bouton
             var newButton = Instantiate(buttonPrefab, parentTransform);
-            newButton.name = $"ExperimentButton_{experiment.Id}";
+            newButton.name = $"ExperimentButton_{experiment.IdExp}";
 
             // Recherche des composants TextMeshProUGUI
             var leftText = newButton.transform.Find("LeftText")?.GetComponent<TextMeshProUGUI>();
             var rightText = newButton.transform.Find("RightText")?.GetComponent<TextMeshProUGUI>();
 
-            // Mise à jour des textes
+            // Mise à jour des textes - Affichage du nom (TitreExp) et de la durée
             if (leftText != null) 
             {
-                leftText.text = experiment.Description;
+                leftText.text = experiment.TitreExp; // Nom de l'expérience
             }
             else 
             {
-                ToDebug($"Warning: LeftText (TextMeshProUGUI) not found on button for experiment {experiment.Id}");
+                ToDebug($"Warning: LeftText (TextMeshProUGUI) not found on button for experiment {experiment.IdExp}");
             }
 
             if (rightText != null) 
             {
-                rightText.text = experiment.Duration;
+                rightText.text = experiment.Duree; // Durée de l'expérience
             }
             else 
             {
-                ToDebug($"Warning: RightText (TextMeshProUGUI) not found on button for experiment {experiment.Id}");
+                ToDebug($"Warning: RightText (TextMeshProUGUI) not found on button for experiment {experiment.IdExp}");
             }
 
             // Configuration du clic sur le bouton
             var buttonComponent = newButton.GetComponent<Button>();
             if (buttonComponent != null)
             {
-                int experimentId = experiment.Id; // Capture locale pour éviter les problèmes de closure
+                int experimentId = experiment.IdExp; // Capture locale pour éviter les problèmes de closure
                 buttonComponent.onClick.AddListener(() => OnExperimentButtonClick(experimentId));
             }
             else
             {
-                ToDebug($"Warning: Button component not found on experiment button {experiment.Id}");
+                ToDebug($"Warning: Button component not found on experiment button {experiment.IdExp}");
             }
         }
 
@@ -177,10 +219,10 @@ public class DynamicExperimentCreator : MonoBehaviour
 
     void OnExperimentButtonClick(int experimentId)
     {
-        var experiment = currentExperiments.FirstOrDefault(e => e.Id == experimentId);
+        var experiment = currentExperiments.FirstOrDefault(e => e.IdExp == experimentId);
         if (experiment != null)
         {
-            ToDebug($"Experiment selected: {experiment.Description} ({experiment.Duration})");
+            ToDebug($"Experiment selected: {experiment.TitreExp} ({experiment.Duree})");
             
             // Ici vous pouvez ajouter la logique pour lancer l'expérience
             // Par exemple :
@@ -192,42 +234,63 @@ public class DynamicExperimentCreator : MonoBehaviour
         }
     }
 
-    void StartExperiment(Experiment experiment)
+    void StartExperiment(ExperienceChimie experiment)
     {
         // Ajoutez ici votre logique pour démarrer l'expérience
         // Par exemple, charger une scène spécifique, ouvrir un panel, etc.
         
-        ToDebug($"Starting experiment: {experiment.Description}");
+        ToDebug($"Starting experiment: {experiment.TitreExp}");
+        ToDebug($"Description: {experiment.DescriptionExp}");
         
         // Exemple : Charger une scène basée sur l'ID de l'expérience
-        // UnityEngine.SceneManagement.SceneManager.LoadScene($"Experiment_{experiment.Id}");
+        // UnityEngine.SceneManagement.SceneManager.LoadScene($"Experiment_{experiment.IdExp}");
         
         // Ou ouvrir un panel spécifique
         // ShowExperimentPanel(experiment);
     }
 
+    // Validation helper
+    private bool ValidateInitialization()
+    {
+        if (dataService == null)
+        {
+            ToDebug("Error: DataService not initialized");
+            return false;
+        }
+        
+        if (!isInitialized)
+        {
+            ToDebug("Error: DynamicExperimentCreator not properly initialized");
+            return false;
+        }
+        
+        return true;
+    }
+
     // Méthodes publiques pour la gestion dynamique
     public void RefreshExperiments()
     {
+        if (!ValidateInitialization()) return;
         LoadAndCreateButtons();
     }
 
-    public void AddNewExperiment(string description, string duration, string category = "General")
+    public void AddNewExperiment(string titre, string description, string duree, int idCategNiv = 1, int idCategTyp = 1)
     {
-        if (dataService == null) return;
+        if (!ValidateInitialization()) return;
 
-        var newExperiment = new Experiment
+        var newExperiment = new ExperienceChimie
         {
-            Description = description,
-            Duration = duration,
-            Category = category,
-            IsActive = true
+            TitreExp = titre,
+            DescriptionExp = description,
+            Duree = duree,
+            IdCategNiv = idCategNiv,
+            IdCategTyp = idCategTyp
         };
 
         try
         {
-            dataService.AddExperiment(newExperiment);
-            ToDebug($"New experiment added: {description}");
+            dataService.AddExperience(newExperiment);
+            ToDebug($"New experiment added: {titre}");
             RefreshExperiments();
         }
         catch (System.Exception e)
@@ -236,51 +299,95 @@ public class DynamicExperimentCreator : MonoBehaviour
         }
     }
 
-    public void FilterExperimentsByCategory(string category)
+    public void FilterExperimentsByNiveau(int idCategNiv)
     {
-        if (dataService == null) return;
+        if (!ValidateInitialization()) return;
 
         try
         {
-            if (string.IsNullOrEmpty(category) || category == "All")
+            if (idCategNiv <= 0)
             {
-                currentExperiments = dataService.GetAllExperiments().ToList();
+                currentExperiments = dataService.GetAllExperiences().ToList();
             }
             else
             {
-                currentExperiments = dataService.GetExperimentsByCategory(category).ToList();
+                currentExperiments = dataService.GetExperiencesByNiveau(idCategNiv).ToList();
             }
             
             CreateButtons();
-            ToDebug($"Filtered experiments by category: {category}. Found {currentExperiments.Count} experiments.");
+            ToDebug($"Filtered experiments by niveau ID: {idCategNiv}. Found {currentExperiments.Count} experiments.");
         }
         catch (System.Exception e)
         {
-            ToDebug($"Error filtering experiments: {e.Message}");
+            ToDebug($"Error filtering experiments by niveau: {e.Message}");
+        }
+    }
+
+    public void FilterExperimentsByType(int idCategTyp)
+    {
+        if (!ValidateInitialization()) return;
+
+        try
+        {
+            if (idCategTyp <= 0)
+            {
+                currentExperiments = dataService.GetAllExperiences().ToList();
+            }
+            else
+            {
+                currentExperiments = dataService.GetExperiencesByType(idCategTyp).ToList();
+            }
+            
+            CreateButtons();
+            ToDebug($"Filtered experiments by type ID: {idCategTyp}. Found {currentExperiments.Count} experiments.");
+        }
+        catch (System.Exception e)
+        {
+            ToDebug($"Error filtering experiments by type: {e.Message}");
+        }
+    }
+
+    public void FilterExperimentsByNiveauAndType(int idCategNiv, int idCategTyp)
+    {
+        if (!ValidateInitialization()) return;
+
+        try
+        {
+            currentExperiments = dataService.GetExperiencesByNiveauAndType(idCategNiv, idCategTyp).ToList();
+            CreateButtons();
+            ToDebug($"Filtered experiments by niveau {idCategNiv} and type {idCategTyp}. Found {currentExperiments.Count} experiments.");
+        }
+        catch (System.Exception e)
+        {
+            ToDebug($"Error filtering experiments by niveau and type: {e.Message}");
         }
     }
 
     private void ToDebug(string message)
     {
-        Debug.Log(message);
+        Debug.Log($"[DynamicExperimentCreator] {message}");
         if (debugText != null)
         {
             debugText.text += System.Environment.NewLine + message;
         }
     }
 
-    // Méthode appelée depuis l'inspecteur pour tester
-    [ContextMenu("Test - Recreate Database")]
-    public void RecreateDatabase()
+    // Méthodes appelées depuis l'inspecteur pour tester
+    [ContextMenu("Test - Refresh Experiments")]
+    public void TestRefreshExperiments()
     {
-        createDBOnStart = true;
-        InitializeDatabase();
-        LoadAndCreateButtons();
+        RefreshExperiments();
     }
 
     [ContextMenu("Test - Add Sample Experiment")]
     public void AddSampleExperiment()
     {
-        AddNewExperiment("Test Experiment", "5 min", "Test");
+        AddNewExperiment("Test Expérience", "Description de test", "10 min", 1, 1);
+    }
+    
+    [ContextMenu("Test - Force Reinitialize")]
+    public void ForceReinitialize()
+    {
+        StartCoroutine(InitializeWithDelay());
     }
 }

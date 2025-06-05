@@ -1,16 +1,22 @@
-using UnityEngine;
+using SQLite4Unity3d;
 
-public class Question : MonoBehaviour
+[System.Serializable]
+public class Question
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [PrimaryKey]
+    public string TitreQuest { get; set; }
+    
+    public string LibQuest { get; set; }
+    
+    public int IdExp { get; set; }
+    
+    // Propriété de navigation (non stockée en base)
+    [Ignore]
+    public ExperienceChimie Experience { get; set; }
+    
+    public override string ToString()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return string.Format("[Question: TitreQuest={0}, LibQuest={1}, IdExp={2}]", 
+            TitreQuest, LibQuest, IdExp);
     }
 }

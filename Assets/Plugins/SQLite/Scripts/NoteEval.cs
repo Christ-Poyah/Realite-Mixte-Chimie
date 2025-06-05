@@ -1,16 +1,26 @@
-using UnityEngine;
 
-public class NoteEval : MonoBehaviour
+using SQLite4Unity3d;
+using System;
+
+[System.Serializable]
+public class NoteEval
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [PrimaryKey, AutoIncrement]
+    public int IdNote { get; set; }
+    
+    public float Valeur { get; set; }
+    
+    public string DateEval { get; set; }
+    
+    public int IdExp { get; set; }
+    
+    // Propriété de navigation (non stockée en base)
+    [Ignore]
+    public ExperienceChimie Experience { get; set; }
+    
+    public override string ToString()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return string.Format("[NoteEval: IdNote={0}, Valeur={1}, DateEval={2}, IdExp={3}]", 
+            IdNote, Valeur, DateEval, IdExp);
     }
 }

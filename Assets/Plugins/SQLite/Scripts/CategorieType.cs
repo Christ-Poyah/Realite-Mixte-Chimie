@@ -1,16 +1,18 @@
-using UnityEngine;
+using SQLite4Unity3d;
 
-public class CategorieType : MonoBehaviour
+[System.Serializable]
+public class CategorieType
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [PrimaryKey, AutoIncrement]
+    public int IdCategTyp { get; set; }
+    
+    public string TitreCategTyp { get; set; }
+    
+    public string DescriptionCategTyp { get; set; }
+    
+    public override string ToString()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return string.Format("[CategorieType: IdCategTyp={0}, TitreCategTyp={1}, DescriptionCategTyp={2}]", 
+            IdCategTyp, TitreCategTyp, DescriptionCategTyp);
     }
 }

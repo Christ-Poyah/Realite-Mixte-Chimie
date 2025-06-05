@@ -1,16 +1,18 @@
-using UnityEngine;
+using SQLite4Unity3d;
 
-public class CategorieNiveau : MonoBehaviour
+[System.Serializable]
+public class CategorieNiveau
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    [PrimaryKey, AutoIncrement]
+    public int IdCategNiv { get; set; }
+    
+    public string TitreCategNiv { get; set; }
+    
+    public string DescriptionCategNiv { get; set; }
+    
+    public override string ToString()
     {
-        
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
+        return string.Format("[CategorieNiveau: IdCategNiv={0}, TitreCategNiv={1}, DescriptionCategNiv={2}]", 
+            IdCategNiv, TitreCategNiv, DescriptionCategNiv);
     }
 }
