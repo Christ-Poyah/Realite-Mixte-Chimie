@@ -10265,6 +10265,7 @@ MonoBehaviour:
   debugText: {fileID: 0}
   spacing: 10
   initializationDelay: 0.5
+  buttonHeight: 60
 --- !u!1 &2134068175
 GameObject:
   m_ObjectHideFlags: 0
