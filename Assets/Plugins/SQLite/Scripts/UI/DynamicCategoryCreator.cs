@@ -4,42 +4,41 @@ using TMPro;
 using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
+using UnityEngine.EventSystems;
 
 public class DynamicCategoryCreator : MonoBehaviour
 {
     [Header("UI References")]
     public GameObject categoryButtonPrefab;
     public Transform categoriesParent;
-    public Text debugText;
-    
+    public TMPro.TMP_Dropdown displayModeDropdown;
+
     [Header("Category Display Settings")]
     public bool showNiveauCategories = true;
     public bool showTypeCategories = true;
-    public CategoryDisplayMode displayMode = CategoryDisplayMode.Mixed;
-    
+    [SerializeField] private CategoryDisplayMode initialDisplayMode = CategoryDisplayMode.NiveauOnly;
+
     [Header("Layout Settings")]
     public int columnsCount = 4;
     public float spacing = 10f;
     public Vector2 cellSize = new Vector2(300f, 100f);
-    public float initializationDelay = 0.1f;
-    
+
     [Header("Visual Settings")]
     public Color niveauCategoryColor = new Color(0.2f, 0.6f, 1f, 1f);
     public Color typeCategoryColor = new Color(1f, 0.6f, 0.2f, 1f);
     public Color selectedCategoryColor = new Color(0.1f, 0.8f, 0.3f, 1f);
-    
+
     [Header("DatabaseManager Reference")]
-    [SerializeField] private DatabaseManager databaseManagerReference; // Référence directe
-    
+    [SerializeField] private DatabaseManager databaseManagerReference;
+
     private DataService dataService;
-    private List<CategorieNiveau> niveauCategories;
-    private List<CategorieType> typeCategories;
-    private bool isInitialized = false;
-    
+    private List<CategorieNiveau> allNiveauCategories;
+    private List<CategorieType> allTypeCategories;
+    private CategoryDisplayMode currentDisplayMode;
+
     public System.Action<int> OnNiveauCategorySelected;
     public System.Action<int> OnTypeCategorySelected;
-    public System.Action OnAllCategoriesSelected;
-    
+
     private int selectedNiveauId = -1;
     private int selectedTypeId = -1;
     private GameObject selectedButton = null;
@@ -47,231 +46,104 @@ public class DynamicCategoryCreator : MonoBehaviour
     public enum CategoryDisplayMode
     {
         NiveauOnly,
-        TypeOnly,
-        Mixed,
-        Separated
+        TypeOnly
     }
 
     void Start()
     {
-        StartCoroutine(InitializeWithDelay());
-    }
-    
-    private IEnumerator InitializeWithDelay()
-    {
-        ToDebug("Starting initialization process...");
-        
-        yield return new WaitForSeconds(initializationDelay);
-        
-        // Méthode 1: Vérifier la référence directe d'abord
-        if (databaseManagerReference != null)
+        if (databaseManagerReference == null)
         {
-            ToDebug("Using direct DatabaseManager reference");
-            if (TryInitializeWithDatabaseManager(databaseManagerReference))
-            {
-                yield break; // Succès avec la référence directe
-            }
+            Debug.LogError("[DynamicCategoryCreator] DatabaseManager Reference is not assigned. Cannot initialize.");
+            return;
         }
-        
-        // Méthode 2: Chercher par FindObjectOfType
-        ToDebug("Searching for DatabaseManager with FindObjectOfType...");
-        var foundDatabaseManager = FindObjectOfType<DatabaseManager>();
-        if (foundDatabaseManager != null)
-        {
-            ToDebug("Found DatabaseManager with FindObjectOfType");
-            if (TryInitializeWithDatabaseManager(foundDatabaseManager))
-            {
-                yield break; // Succès avec FindObjectOfType
-            }
-        }
-        
-        // Méthode 3: Attendre le singleton (méthode originale améliorée)
-        ToDebug("Waiting for DatabaseManager singleton...");
-        yield return StartCoroutine(WaitForDatabaseManagerSingleton());
-    }
-    
-    private bool TryInitializeWithDatabaseManager(DatabaseManager dbManager)
-    {
-        try
-        {
-            ToDebug($"Trying to initialize with DatabaseManager: {dbManager.name}");
-            
-            // Vérifier si le DatabaseManager est prêt
-            if (!dbManager.IsDatabaseReady())
-            {
-                ToDebug("DatabaseManager found but database not ready");
-                return false;
-            }
-            
-            var service = dbManager.GetDataService();
-            if (service == null)
-            {
-                ToDebug("DatabaseManager found but DataService is null");
-                return false;
-            }
-            
-            dataService = service;
-            ToDebug("DataService obtained successfully");
-            
-            InitializeCategoryCreator();
-            return true;
-        }
-        catch (System.Exception e)
-        {
-            ToDebug($"Error initializing with DatabaseManager: {e.Message}");
-            return false;
-        }
-    }
-    
-    private IEnumerator WaitForDatabaseManagerSingleton()
-    {
-        int attempts = 0;
-        const int maxAttempts = 100; // Augmenté pour plus de patience
-        
-        while (attempts < maxAttempts)
-        {
-            try
-            {
-                // Vérifier si la classe DatabaseManager existe et a une instance
-                if (DatabaseManager.Instance != null)
-                {
-                    ToDebug("DatabaseManager singleton found!");
-                    
-                    if (DatabaseManager.Instance.IsDatabaseReady())
-                    {
-                        ToDebug("Database is ready!");
-                        dataService = DatabaseManager.Instance.GetDataService();
-                        
-                        if (dataService != null)
-                        {
-                            ToDebug("DataService obtained from singleton");
-                            InitializeCategoryCreator();
-                            yield break; // Succès
-                        }
-                    }
-                    else
-                    {
-                        ToDebug($"Database not ready, waiting... Attempt {attempts + 1}/{maxAttempts}");
-                    }
-                }
-                else
-                {
-                    ToDebug($"DatabaseManager singleton not found. Attempt {attempts + 1}/{maxAttempts}");
-                }
-            }
-            catch (System.Exception e)
-            {
-                ToDebug($"Error checking DatabaseManager singleton: {e.Message}");
-            }
-            
-            yield return new WaitForSeconds(0.2f);
-            attempts++;
-        }
-        
-        ToDebug("ERROR: Could not initialize DatabaseManager after all attempts");
-        ToDebug("Creating fallback test buttons...");
-        
-        // Fallback: créer des boutons de test
-        CreateTestButtons();
-    }
 
-    void InitializeCategoryCreator()
-    {
-        try
+        dataService = databaseManagerReference.GetDataService();
+
+        if (dataService == null)
         {
-            ToDebug("Starting InitializeCategoryCreator...");
-            
-            if (!ValidateUIReferences())
-            {
-                ToDebug("ERROR: UI References validation failed");
-                CreateTestButtons(); // Fallback
-                return;
-            }
-            
-            if (dataService == null)
-            {
-                ToDebug("ERROR: DataService is null");
-                CreateTestButtons(); // Fallback
-                return;
-            }
-            
-            isInitialized = true;
-            SetupGridLayout();
+            Debug.LogError("[DynamicCategoryCreator] Failed to get DataService. Database might not be ready or DataService is null.");
+            return;
+        }
+
+        Debug.Log("[DynamicCategoryCreator] Initialized with DataService.");
+
+        LoadAllCategoriesData();
+
+        if (!ValidateUIReferences())
+        {
+             Debug.LogError("[DynamicCategoryCreator] Initialization failed: UI References are missing or invalid.");
+             return;
+        }
+
+        // CORRECTION 1: Vérifier et corriger le parent avant de configurer le layout
+        ValidateAndFixParentSetup();
+
+        SetupGridLayout();
+
+        if (displayModeDropdown != null)
+        {
+            SetupDisplayModeDropdown();
+        }
+        else
+        {
+            Debug.LogWarning("[DynamicCategoryCreator] Display Mode Dropdown is not assigned. Using initialDisplayMode setting and initializing directly.");
+            currentDisplayMode = initialDisplayMode;
             LoadAndCreateCategoryButtons();
-            
-            ToDebug("DynamicCategoryCreator initialized successfully");
-        }
-        catch (System.Exception e)
-        {
-            ToDebug($"Error initializing DynamicCategoryCreator: {e.Message}");
-            ToDebug("Creating fallback test buttons...");
-            CreateTestButtons();
         }
     }
 
-    bool ValidateUIReferences()
+    // CORRECTION 2: Nouvelle méthode pour valider et corriger la configuration du parent
+    void ValidateAndFixParentSetup()
     {
-        ToDebug("=== UI REFERENCES VALIDATION ===");
-        
-        if (categoryButtonPrefab == null)
+        if (categoriesParent == null) return;
+
+        // Vérifier que le parent a un RectTransform
+        RectTransform parentRect = categoriesParent.GetComponent<RectTransform>();
+        if (parentRect == null)
         {
-            ToDebug("CRITICAL ERROR: CategoryButtonPrefab is NULL!");
-            return false;
+            Debug.LogError("[DynamicCategoryCreator] CategoriesParent must have a RectTransform component!");
+            return;
         }
-        ToDebug($"✓ CategoryButtonPrefab: {categoryButtonPrefab.name}");
-        
-        if (categoriesParent == null)
+
+        // Activer le GameObject parent s'il est désactivé
+        if (!categoriesParent.gameObject.activeInHierarchy)
         {
-            ToDebug("CRITICAL ERROR: CategoriesParent is NULL!");
-            return false;
+            Debug.LogWarning("[DynamicCategoryCreator] CategoriesParent was inactive. Activating it.");
+            categoriesParent.gameObject.SetActive(true);
         }
-        ToDebug($"✓ CategoriesParent: {categoriesParent.name}");
-        
-        var buttonComp = categoryButtonPrefab.GetComponent<Button>();
-        if (buttonComp == null)
+
+        // Vérifier la taille du parent
+        if (parentRect.sizeDelta.x <= 0 || parentRect.sizeDelta.y <= 0)
         {
-            ToDebug("WARNING: CategoryButtonPrefab doesn't have a Button component!");
+            Debug.LogWarning($"[DynamicCategoryCreator] Parent RectTransform has zero size: {parentRect.sizeDelta}. This may cause display issues.");
         }
-        else
-        {
-            ToDebug("✓ CategoryButtonPrefab has Button component");
-        }
-        
-        var textComp = categoryButtonPrefab.GetComponentInChildren<TextMeshProUGUI>();
-        if (textComp == null)
-        {
-            var legacyText = categoryButtonPrefab.GetComponentInChildren<Text>();
-            if (legacyText == null)
-            {
-                ToDebug("WARNING: CategoryButtonPrefab doesn't have Text component!");
-            }
-            else
-            {
-                ToDebug("✓ CategoryButtonPrefab has legacy Text component");
-            }
-        }
-        else
-        {
-            ToDebug("✓ CategoryButtonPrefab has TextMeshProUGUI component");
-        }
-        
-        ToDebug("=== END UI VALIDATION ===");
-        return true;
+
+        Debug.Log($"[DynamicCategoryCreator] Parent validation complete. Size: {parentRect.sizeDelta}, Active: {categoriesParent.gameObject.activeInHierarchy}");
     }
 
     void SetupGridLayout()
     {
         if (categoriesParent == null) return;
 
-        ToDebug("Setting up Grid Layout...");
+        // Supprimer les composants conflictuels
+        var existingSizeFitter = categoriesParent.GetComponent<ContentSizeFitter>();
+        if (existingSizeFitter != null)
+        {
+            Debug.Log("[DynamicCategoryCreator] Removing ContentSizeFitter to avoid conflicts with GridLayoutGroup.");
+            if (Application.isPlaying)
+                Destroy(existingSizeFitter);
+            else
+                DestroyImmediate(existingSizeFitter);
+        }
 
         var gridLayout = categoriesParent.GetComponent<GridLayoutGroup>();
         if (gridLayout == null)
         {
             gridLayout = categoriesParent.gameObject.AddComponent<GridLayoutGroup>();
-            ToDebug("Added GridLayoutGroup component");
+            Debug.Log("[DynamicCategoryCreator] Added GridLayoutGroup.");
         }
-        
+
+        // Configuration du GridLayoutGroup
         gridLayout.cellSize = cellSize;
         gridLayout.spacing = new Vector2(spacing, spacing);
         gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
@@ -280,226 +152,241 @@ public class DynamicCategoryCreator : MonoBehaviour
         gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
         gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
 
-        var sizeFitter = categoriesParent.GetComponent<ContentSizeFitter>();
-        if (sizeFitter == null)
+        // CORRECTION 3: Configuration améliorée du RectTransform parent
+        var rectTransform = categoriesParent.GetComponent<RectTransform>();
+        if (rectTransform != null)
         {
-            sizeFitter = categoriesParent.gameObject.AddComponent<ContentSizeFitter>();
-            ToDebug("Added ContentSizeFitter component");
+            // Configuration pour expansion verticale
+            rectTransform.anchorMin = new Vector2(0, 1);
+            rectTransform.anchorMax = new Vector2(1, 1);
+            rectTransform.pivot = new Vector2(0.5f, 1);
+            rectTransform.anchoredPosition = new Vector2(0, 0);
+            
+            // S'assurer qu'il y a assez d'espace
+            if (rectTransform.sizeDelta.x <= 0)
+            {
+                rectTransform.sizeDelta = new Vector2(800f, rectTransform.sizeDelta.y);
+            }
         }
-        sizeFitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
-        sizeFitter.horizontalFit = ContentSizeFitter.FitMode.Unconstrained;
 
-        ToDebug("Grid Layout setup completed");
+        Debug.Log("[DynamicCategoryCreator] Grid layout setup complete.");
+    }
+
+    void LoadAllCategoriesData()
+    {
+         try
+        {
+            if (showNiveauCategories && dataService.GetAllCategoriesNiveau() != null)
+            {
+                allNiveauCategories = dataService.GetAllCategoriesNiveau().ToList();
+                Debug.Log($"[DynamicCategoryCreator] Loaded {allNiveauCategories.Count} total niveau categories from DB.");
+            } else {
+                 allNiveauCategories = new List<CategorieNiveau>();
+                 if (!showNiveauCategories) Debug.Log($"[DynamicCategoryCreator] showNiveauCategories is false. Skipping loading niveau categories.");
+                 else Debug.LogWarning($"[DynamicCategoryCreator] dataService.GetAllCategoriesNiveau() returned null.");
+            }
+
+            if (showTypeCategories && dataService.GetAllCategoriesType() != null)
+            {
+                allTypeCategories = dataService.GetAllCategoriesType().ToList();
+                Debug.Log($"[DynamicCategoryCreator] Loaded {allTypeCategories.Count} total type categories from DB.");
+            } else {
+                 allTypeCategories = new List<CategorieType>();
+                 if (!showTypeCategories) Debug.Log($"[DynamicCategoryCreator] showTypeCategories is false. Skipping loading type categories.");
+                 else Debug.LogWarning($"[DynamicCategoryCreator] dataService.GetAllCategoriesType() returned null.");
+            }
+
+             if (allNiveauCategories.Count == 0 && allTypeCategories.Count == 0)
+             {
+                 Debug.LogWarning("[DynamicCategoryCreator] No categories found in database after initial load (check data and showNiveau/TypeCategories flags).");
+             }
+        }
+         catch (System.Exception e)
+        {
+            Debug.LogError($"[DynamicCategoryCreator] Error loading all categories data: {e.Message}");
+             allNiveauCategories = new List<CategorieNiveau>();
+             allTypeCategories = new List<CategorieType>();
+        }
+    }
+
+    void SetupDisplayModeDropdown()
+    {
+        if (displayModeDropdown == null) return;
+
+        displayModeDropdown.ClearOptions();
+
+        List<string> options = new List<string>
+        {
+            "Niveaux",
+            "Types"
+        };
+
+        displayModeDropdown.AddOptions(options);
+
+        displayModeDropdown.onValueChanged.RemoveAllListeners();
+        displayModeDropdown.onValueChanged.AddListener(OnDisplayModeDropdownChanged);
+
+        int initialIndex = 0;
+        if (initialDisplayMode == CategoryDisplayMode.TypeOnly)
+        {
+            initialIndex = options.IndexOf("Types");
+            if (initialIndex == -1) initialIndex = 0;
+        }
+        if (initialIndex < 0 || initialIndex >= options.Count) initialIndex = 0;
+
+        displayModeDropdown.value = initialIndex;
+        OnDisplayModeDropdownChanged(initialIndex);
+
+        Debug.Log("[DynamicCategoryCreator] Dropdown setup complete. Initial mode display triggered.");
+    }
+
+    private void OnDisplayModeDropdownChanged(int index)
+    {
+        if (displayModeDropdown == null || index < 0 || index >= displayModeDropdown.options.Count)
+        {
+            Debug.LogError("[DynamicCategoryCreator] Invalid dropdown index or dropdown reference.");
+            return;
+        }
+
+        string selectedText = displayModeDropdown.options[index].text;
+        CategoryDisplayMode newMode = currentDisplayMode;
+
+        switch (selectedText)
+        {
+            case "Niveaux":
+                newMode = CategoryDisplayMode.NiveauOnly;
+                break;
+            case "Types":
+                newMode = CategoryDisplayMode.TypeOnly;
+                break;
+            default:
+                Debug.LogWarning($"[DynamicCategoryCreator] Unrecognized dropdown option '{selectedText}' selected.");
+                return;
+        }
+
+        SetDisplayMode(newMode);
     }
 
     void LoadAndCreateCategoryButtons()
     {
-        if (!ValidateInitialization())
-        {
-            ToDebug("Validation failed, creating test buttons");
-            CreateTestButtons();
-            return;
-        }
+        if (dataService == null || !ValidateUIReferences()) return;
 
-        try
-        {
-            ToDebug("Loading categories from database...");
-            
-            if (showNiveauCategories)
-            {
-                var niveauxEnumerable = dataService.GetAllCategoriesNiveau();
-                niveauCategories = niveauxEnumerable?.ToList() ?? new List<CategorieNiveau>();
-                ToDebug($"Loaded {niveauCategories.Count} niveau categories");
-            }
-            
-            if (showTypeCategories)
-            {
-                var typesEnumerable = dataService.GetAllCategoriesType();
-                typeCategories = typesEnumerable?.ToList() ?? new List<CategorieType>();
-                ToDebug($"Loaded {typeCategories.Count} type categories");
-            }
+        Debug.Log($"[DynamicCategoryCreator] Clearing existing buttons and creating buttons for mode: {currentDisplayMode}");
 
-            if ((niveauCategories?.Count ?? 0) == 0 && (typeCategories?.Count ?? 0) == 0)
-            {
-                ToDebug("No categories found in database, creating test buttons");
-                CreateTestButtons();
-                return;
-            }
-
-            CreateCategoryButtons();
-        }
-        catch (System.Exception e)
-        {
-            ToDebug($"Error loading categories: {e.Message}");
-            CreateTestButtons();
-        }
-    }
-
-    void CreateCategoryButtons()
-    {
-        if (!ValidateUIReferences())
-        {
-            ToDebug("ERROR: Cannot create buttons - UI references validation failed");
-            return;
-        }
-
-        ToDebug("Starting category buttons creation...");
         ClearExistingButtons();
-        CreateAllCategoriesButton();
 
-        switch (displayMode)
+        int buttonsCreatedCount = 0;
+
+        switch (currentDisplayMode)
         {
             case CategoryDisplayMode.NiveauOnly:
-                CreateNiveauButtons();
+                 if (showNiveauCategories && allNiveauCategories != null && allNiveauCategories.Count > 0)
+                {
+                    foreach (var category in allNiveauCategories)
+                    {
+                        CreateNiveauCategoryButton(category);
+                        buttonsCreatedCount++;
+                    }
+                    Debug.Log($"[DynamicCategoryCreator] Created {buttonsCreatedCount} Niveau buttons.");
+                } else { Debug.Log("[DynamicCategoryCreator] No Niveau categories to create for NiveauOnly mode."); }
                 break;
+
             case CategoryDisplayMode.TypeOnly:
-                CreateTypeButtons();
+                 if (showTypeCategories && allTypeCategories != null && allTypeCategories.Count > 0)
+                 {
+                     foreach (var category in allTypeCategories)
+                     {
+                        CreateTypeCategoryButton(category);
+                        buttonsCreatedCount++;
+                     }
+                     Debug.Log($"[DynamicCategoryCreator] Created {buttonsCreatedCount} Type buttons.");
+                 } else { Debug.Log("[DynamicCategoryCreator] No Type categories to create for TypeOnly mode."); }
                 break;
-            case CategoryDisplayMode.Mixed:
-                CreateMixedButtons();
-                break;
-            case CategoryDisplayMode.Separated:
-                CreateSeparatedButtons();
-                break;
+
+             default:
+                 Debug.LogWarning($"[DynamicCategoryCreator] Unexpected currentDisplayMode: {currentDisplayMode}. No category buttons created.");
+                 break;
         }
 
-        ToDebug("Category buttons creation completed");
+        if (buttonsCreatedCount == 0)
+        {
+             Debug.LogWarning("[DynamicCategoryCreator] No category buttons created for the current display mode from loaded data.");
+        } else {
+             Debug.Log($"[DynamicCategoryCreator] Total buttons created: {buttonsCreatedCount}.");
+        }
+
         StartCoroutine(ForceLayoutRefresh());
     }
-    
-    private void CreateAllCategoriesButton()
-    {
-        ToDebug("Creating 'All Categories' button");
-        
-        var allButton = Instantiate(categoryButtonPrefab, categoriesParent);
-        allButton.name = "AllCategoriesButton";
-        allButton.SetActive(true);
-        
-        SetButtonText(allButton, "Toutes les catégories");
-        SetButtonColor(allButton, Color.white);
-        
-        var buttonComp = allButton.GetComponent<Button>();
-        if (buttonComp != null)
-        {
-            buttonComp.onClick.AddListener(() => OnAllCategoriesButtonClick(allButton));
-        }
-    }
 
-    private void CreateNiveauButtons()
-    {
-        if (niveauCategories == null || niveauCategories.Count == 0)
-        {
-            ToDebug("No niveau categories to create");
-            return;
-        }
-
-        ToDebug($"Creating {niveauCategories.Count} niveau category buttons");
-
-        foreach (var category in niveauCategories)
-        {
-            CreateNiveauCategoryButton(category);
-        }
-    }
-
-    private void CreateTypeButtons()
-    {
-        if (typeCategories == null || typeCategories.Count == 0)
-        {
-            ToDebug("No type categories to create");
-            return;
-        }
-
-        ToDebug($"Creating {typeCategories.Count} type category buttons");
-
-        foreach (var category in typeCategories)
-        {
-            CreateTypeCategoryButton(category);
-        }
-    }
-
-    private void CreateMixedButtons()
-    {
-        CreateNiveauButtons();
-        CreateTypeButtons();
-    }
-
-    private void CreateSeparatedButtons()
-    {
-        CreateNiveauButtons();
-        CreateTypeButtons();
-    }
-
+    // CORRECTION 4: Amélioration de la création des boutons avec validation
     private void CreateNiveauCategoryButton(CategorieNiveau category)
     {
-        if (category == null)
-        {
-            ToDebug("Cannot create button: category is null");
-            return;
-        }
-        
-        ToDebug($"Creating niveau button: {category.TitreCategNiv}");
-        
+        if (category == null || !ValidateUIReferences() || categoryButtonPrefab == null || categoriesParent == null) return;
+
+        Debug.Log($"[DynamicCategoryCreator] Creating Niveau button for: {category.TitreCategNiv} (ID: {category.IdCategNiv})");
+
         var button = Instantiate(categoryButtonPrefab, categoriesParent);
         button.name = $"NiveauButton_{category.IdCategNiv}";
+        
+        // CORRECTION: S'assurer que le bouton est actif
         button.SetActive(true);
-        
-        SetButtonText(button, category.TitreCategNiv ?? "Niveau");
-        SetButtonColor(button, niveauCategoryColor);
-        
+
+        // Vérifier que le bouton a été correctement créé
+        if (button.transform.parent != categoriesParent)
+        {
+            Debug.LogError($"[DynamicCategoryCreator] Button parent assignment failed for {category.TitreCategNiv}");
+            return;
+        }
+
+        SetButtonText(button, category.TitreCategNiv ?? $"Niveau {category.IdCategNiv}");
+        SetButtonBaseColor(button, niveauCategoryColor);
+
         var buttonComp = button.GetComponent<Button>();
         if (buttonComp != null)
         {
             int categoryId = category.IdCategNiv;
             buttonComp.onClick.AddListener(() => OnNiveauButtonClick(categoryId, button));
+            Debug.Log($"[DynamicCategoryCreator] Successfully created and configured Niveau button: {category.TitreCategNiv}");
+        }
+         else
+        {
+             Debug.LogWarning($"[DynamicCategoryCreator] Button prefab for '{category.TitreCategNiv ?? "Niveau"}' is missing Button component.");
         }
     }
 
     private void CreateTypeCategoryButton(CategorieType category)
     {
-        if (category == null)
-        {
-            ToDebug("Cannot create button: category is null");
-            return;
-        }
-        
-        ToDebug($"Creating type button: {category.TitreCategTyp}");
-        
+        if (category == null || !ValidateUIReferences() || categoryButtonPrefab == null || categoriesParent == null) return;
+
+        Debug.Log($"[DynamicCategoryCreator] Creating Type button for: {category.TitreCategTyp} (ID: {category.IdCategTyp})");
+
         var button = Instantiate(categoryButtonPrefab, categoriesParent);
         button.name = $"TypeButton_{category.IdCategTyp}";
         button.SetActive(true);
-        
-        SetButtonText(button, category.TitreCategTyp ?? "Type");
-        SetButtonColor(button, typeCategoryColor);
-        
+
+        if (button.transform.parent != categoriesParent)
+        {
+            Debug.LogError($"[DynamicCategoryCreator] Button parent assignment failed for {category.TitreCategTyp}");
+            return;
+        }
+
+        SetButtonText(button, category.TitreCategTyp ?? $"Type {category.IdCategTyp}");
+        SetButtonBaseColor(button, typeCategoryColor);
+
         var buttonComp = button.GetComponent<Button>();
         if (buttonComp != null)
         {
             int categoryId = category.IdCategTyp;
             buttonComp.onClick.AddListener(() => OnTypeButtonClick(categoryId, button));
+            Debug.Log($"[DynamicCategoryCreator] Successfully created and configured Type button: {category.TitreCategTyp}");
+        }
+        else
+        {
+             Debug.LogWarning($"[DynamicCategoryCreator] Button prefab for '{category.TitreCategTyp ?? "Type"}' is missing Button component.");
         }
     }
 
-    private void SetButtonText(GameObject button, string text)
-    {
-        var tmpText = button.GetComponentInChildren<TextMeshProUGUI>();
-        if (tmpText != null)
-        {
-            tmpText.text = text;
-            tmpText.fontSize = 16f;
-            tmpText.alignment = TextAlignmentOptions.Center;
-            return;
-        }
-        
-        var legacyText = button.GetComponentInChildren<Text>();
-        if (legacyText != null)
-        {
-            legacyText.text = text;
-            legacyText.fontSize = 16;
-            legacyText.alignment = TextAnchor.MiddleCenter;
-        }
-    }
-
-    private void SetButtonColor(GameObject button, Color color)
+    private void SetButtonBaseColor(GameObject button, Color color)
     {
         var buttonComp = button.GetComponent<Button>();
         if (buttonComp != null)
@@ -508,57 +395,36 @@ public class DynamicCategoryCreator : MonoBehaviour
             colors.normalColor = color;
             colors.highlightedColor = Color.Lerp(color, Color.white, 0.2f);
             colors.pressedColor = Color.Lerp(color, Color.black, 0.2f);
+            colors.selectedColor = selectedCategoryColor;
             buttonComp.colors = colors;
+        }
+         else
+        {
+             Debug.LogWarning($"[DynamicCategoryCreator] Button '{button.name}' missing Button component to set colors.");
         }
     }
 
-    private void CreateTestButtons()
+    // CORRECTION 5: Amélioration de la configuration du texte avec plus de logs
+    private void SetButtonText(GameObject button, string text)
     {
-        ToDebug("Creating test category buttons...");
-        
-        if (!ValidateUIReferences())
+        var tmpText = button.GetComponentInChildren<TextMeshProUGUI>();
+        if (tmpText != null)
         {
-            ToDebug("Cannot create test buttons - UI validation failed");
+            tmpText.text = text;
+            Debug.Log($"[DynamicCategoryCreator] Set TextMeshPro text to '{text}' for button {button.name}");
             return;
         }
-        
-        ClearExistingButtons();
-        SetupGridLayout(); // S'assurer que le layout est configuré
-        
-        string[] testCategories = { "Toutes", "Débutant", "Intermédiaire", "Avancé", "Acides", "Bases", "Sels" };
-        
-        for (int i = 0; i < testCategories.Length; i++)
+
+        var legacyText = button.GetComponentInChildren<Text>();
+        if (legacyText != null)
         {
-            var testButton = Instantiate(categoryButtonPrefab, categoriesParent);
-            testButton.name = $"TestButton_{i}";
-            testButton.SetActive(true);
-            
-            SetButtonText(testButton, testCategories[i]);
-            
-            Color buttonColor = Color.white;
-            if (i == 0) buttonColor = Color.white; // Toutes
-            else if (i <= 3) buttonColor = niveauCategoryColor; // Niveaux
-            else buttonColor = typeCategoryColor; // Types
-            
-            SetButtonColor(testButton, buttonColor);
-            
-            var buttonComp = testButton.GetComponent<Button>();
-            if (buttonComp != null)
-            {
-                string categoryName = testCategories[i];
-                int index = i;
-                buttonComp.onClick.AddListener(() => {
-                    ToDebug($"Test button clicked: {categoryName}");
-                    if (index == 0)
-                    {
-                        OnAllCategoriesButtonClick(testButton);
-                    }
-                });
-            }
+            legacyText.text = text;
+            Debug.Log($"[DynamicCategoryCreator] Set legacy Text to '{text}' for button {button.name}");
         }
-        
-        ToDebug("Test buttons created successfully");
-        StartCoroutine(ForceLayoutRefresh());
+        else
+        {
+             Debug.LogWarning($"[DynamicCategoryCreator] Button '{button.name}' has no Text or TextMeshProUGUI component in children.");
+        }
     }
 
     void ClearExistingButtons()
@@ -566,152 +432,151 @@ public class DynamicCategoryCreator : MonoBehaviour
         if (categoriesParent == null) return;
 
         int childCount = categoriesParent.childCount;
-        ToDebug($"Clearing {childCount} existing category buttons");
-
-        for (int i = childCount - 1; i >= 0; i--)
+        if (childCount == 0)
         {
-            var child = categoriesParent.GetChild(i);
-            if (Application.isPlaying)
-            {
-                Destroy(child.gameObject);
-            }
-            else
-            {
-                DestroyImmediate(child.gameObject);
-            }
+             Debug.Log("[DynamicCategoryCreator] No existing buttons to clear.");
+             return;
         }
-        
+
+        List<GameObject> childrenToDestroy = new List<GameObject>();
+        foreach (Transform child in categoriesParent)
+        {
+             childrenToDestroy.Add(child.gameObject);
+        }
+
+        foreach (GameObject child in childrenToDestroy)
+        {
+            if (Application.isPlaying) Destroy(child);
+            else DestroyImmediate(child);
+        }
+
         selectedNiveauId = -1;
         selectedTypeId = -1;
         selectedButton = null;
-        
-        ToDebug("Existing category buttons cleared");
+
+        Debug.Log($"[DynamicCategoryCreator] Cleared {childCount} existing category buttons.");
     }
 
+    // CORRECTION 6: Amélioration du refresh du layout
     private IEnumerator ForceLayoutRefresh()
     {
-        ToDebug("Starting layout refresh process...");
-        
         yield return null;
         yield return null;
-        yield return new WaitForEndOfFrame();
-        
+
         if (categoriesParent != null)
         {
-            var gridLayout = categoriesParent.GetComponent<GridLayoutGroup>();
-            var sizeFitter = categoriesParent.GetComponent<ContentSizeFitter>();
-            
-            if (gridLayout != null)
-            {
-                gridLayout.enabled = false;
-                yield return null;
-                gridLayout.enabled = true;
-                ToDebug("GridLayoutGroup refreshed");
-            }
-            
-            if (sizeFitter != null)
-            {
-                sizeFitter.enabled = false;
-                yield return null;
-                sizeFitter.enabled = true;
-                ToDebug("ContentSizeFitter refreshed");
-            }
-            
-            Canvas.ForceUpdateCanvases();
-            yield return null;
             Canvas.ForceUpdateCanvases();
             
-            LayoutRebuilder.ForceRebuildLayoutImmediate(categoriesParent.GetComponent<RectTransform>());
-            
-            LogCategoryButtonsStatus();
+            var rectTransform = categoriesParent.GetComponent<RectTransform>();
+            if (rectTransform != null)
+            {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
+                
+                if (rectTransform.parent != null)
+                {
+                    var parentRectTransform = rectTransform.parent.GetComponent<RectTransform>();
+                    if (parentRectTransform != null)
+                    {
+                        LayoutRebuilder.ForceRebuildLayoutImmediate(parentRectTransform);
+                    }
+                }
+
+                // Log des informations de debug après le refresh
+                Debug.Log($"[DynamicCategoryCreator] Layout refresh completed. Children count: {categoriesParent.childCount}, Parent size: {rectTransform.sizeDelta}");
+            }
         }
     }
 
-    private void LogCategoryButtonsStatus()
+    bool ValidateUIReferences()
     {
-        if (categoriesParent == null) return;
-        
-        int totalButtons = categoriesParent.childCount;
-        int activeButtons = 0;
-        
-        ToDebug($"=== CATEGORY BUTTONS STATUS ===");
-        ToDebug($"Total buttons: {totalButtons}");
-        
-        for (int i = 0; i < totalButtons; i++)
+        bool isValid = true;
+        if (categoryButtonPrefab == null)
         {
-            var child = categoriesParent.GetChild(i);
-            bool isActive = child.gameObject.activeInHierarchy;
-            if (isActive) activeButtons++;
-            
-            ToDebug($"Button {i}: {child.name} - Active: {isActive}");
+            Debug.LogError("[DynamicCategoryCreator] CRITICAL ERROR: CategoryButtonPrefab is NULL!");
+            isValid = false;
         }
-        
-        ToDebug($"Active buttons: {activeButtons}/{totalButtons}");
-        ToDebug($"=== END BUTTONS STATUS ===");
-    }
+        if (categoriesParent == null)
+        {
+            Debug.LogError("[DynamicCategoryCreator] CRITICAL ERROR: CategoriesParent is NULL!");
+            isValid = false;
+        }
+         if (displayModeDropdown == null)
+         {
+             Debug.LogWarning("[DynamicCategoryCreator] DisplayModeDropdown is NULL. Category filtering via dropdown will not work; using initialDisplayMode.");
+         }
 
-    // Gestionnaires d'événements
-    private void OnAllCategoriesButtonClick(GameObject button)
-    {
-        ToDebug("All categories button clicked");
-        
-        UpdateSelectedButton(button);
-        selectedNiveauId = -1;
-        selectedTypeId = -1;
-        
-        OnAllCategoriesSelected?.Invoke();
+        return isValid;
     }
 
     private void OnNiveauButtonClick(int categoryId, GameObject button)
     {
-        var category = niveauCategories?.FirstOrDefault(c => c.IdCategNiv == categoryId);
-        if (category != null)
-        {
-            ToDebug($"Niveau category selected: {category.TitreCategNiv} (ID: {categoryId})");
-            
-            UpdateSelectedButton(button);
-            selectedNiveauId = categoryId;
-            selectedTypeId = -1;
-            
-            OnNiveauCategorySelected?.Invoke(categoryId);
-        }
+        var category = allNiveauCategories?.FirstOrDefault(c => c.IdCategNiv == categoryId);
+        string categoryTitle = category != null ? category.TitreCategNiv : $"Unknown Niveau (ID: {categoryId})";
+
+        Debug.Log($"[DynamicCategoryCreator] Niveau category selected: {categoryTitle}");
+
+        UpdateSelectedButton(button);
+        selectedNiveauId = categoryId;
+        selectedTypeId = -1;
+
+        OnNiveauCategorySelected?.Invoke(categoryId);
     }
 
     private void OnTypeButtonClick(int categoryId, GameObject button)
     {
-        var category = typeCategories?.FirstOrDefault(c => c.IdCategTyp == categoryId);
-        if (category != null)
-        {
-            ToDebug($"Type category selected: {category.TitreCategTyp} (ID: {categoryId})");
-            
-            UpdateSelectedButton(button);
-            selectedTypeId = categoryId;
-            selectedNiveauId = -1;
-            
-            OnTypeCategorySelected?.Invoke(categoryId);
-        }
+        var category = allTypeCategories?.FirstOrDefault(c => c.IdCategTyp == categoryId);
+        string categoryTitle = category != null ? category.TitreCategTyp : $"Unknown Type (ID: {categoryId})";
+
+        Debug.Log($"[DynamicCategoryCreator] Type category selected: {categoryTitle}");
+
+        UpdateSelectedButton(button);
+        selectedTypeId = categoryId;
+        selectedNiveauId = -1;
+
+        OnTypeCategorySelected?.Invoke(categoryId);
     }
 
     private void UpdateSelectedButton(GameObject newSelectedButton)
     {
-        if (selectedButton != null)
+        if (selectedButton != null && selectedButton != newSelectedButton)
         {
             RestoreButtonColor(selectedButton);
         }
-        
-        selectedButton = newSelectedButton;
-        if (selectedButton != null)
+
+        if (selectedButton != newSelectedButton)
         {
-            SetButtonColor(selectedButton, selectedCategoryColor);
+             selectedButton = newSelectedButton;
+              if (selectedButton != null)
+              {
+                  ApplySelectedColor(selectedButton);
+              }
         }
+    }
+
+    private void ApplySelectedColor(GameObject button)
+    {
+         var buttonComp = button.GetComponent<Button>();
+         if (buttonComp != null)
+         {
+             var colors = buttonComp.colors;
+             colors.normalColor = selectedCategoryColor;
+             colors.highlightedColor = Color.Lerp(selectedCategoryColor, Color.white, 0.2f);
+             colors.pressedColor = Color.Lerp(selectedCategoryColor, Color.black, 0.2f);
+             buttonComp.colors = colors;
+             Debug.Log($"[DynamicCategoryCreator] Applied selected color to button: {button.name}");
+         }
+         else
+         {
+              Debug.LogWarning($"[DynamicCategoryCreator] Cannot apply selected color: Button component missing on {button.name}.");
+         }
     }
 
     private void RestoreButtonColor(GameObject button)
     {
         if (button == null) return;
-        
-        Color originalColor = Color.white;
-        
+
+        Color originalColor;
+
         if (button.name.StartsWith("NiveauButton_"))
         {
             originalColor = niveauCategoryColor;
@@ -720,45 +585,36 @@ public class DynamicCategoryCreator : MonoBehaviour
         {
             originalColor = typeCategoryColor;
         }
-        
-        SetButtonColor(button, originalColor);
+        else
+        {
+            Debug.LogWarning($"[DynamicCategoryCreator] Attempted to restore color for unknown button type: {button.name}. Using default white.");
+            originalColor = Color.white;
+        }
+
+        SetButtonBaseColor(button, originalColor);
+         Debug.Log($"[DynamicCategoryCreator] Restored base color for button: {button.name}");
     }
 
-    private bool ValidateInitialization()
+    public void RefreshCategories()
     {
         if (dataService == null)
         {
-            ToDebug("Error: DataService not initialized");
-            return false;
+            Debug.LogError("[DynamicCategoryCreator] Cannot refresh categories: DataService is null.");
+            return;
         }
-        
-        if (!isInitialized)
-        {
-            ToDebug("Error: DynamicCategoryCreator not properly initialized");
-            return false;
-        }
-        
-        return true;
-    }
-
-    // Méthodes publiques
-    public void RefreshCategories()
-    {
-        ToDebug("Refreshing categories...");
-        if (ValidateInitialization())
-        {
-            LoadAndCreateCategoryButtons();
-        }
-        else
-        {
-            CreateTestButtons();
-        }
+        Debug.Log("[DynamicCategoryCreator] Refreshing categories display...");
+        LoadAndCreateCategoryButtons();
     }
 
     public void SetDisplayMode(CategoryDisplayMode mode)
     {
-        displayMode = mode;
-        ToDebug($"Display mode changed to: {mode}");
+        if (currentDisplayMode == mode)
+        {
+             Debug.Log($"[DynamicCategoryCreator] Display mode already {mode}. No change needed.");
+             return;
+        }
+        currentDisplayMode = mode;
+        Debug.Log($"[DynamicCategoryCreator] Display mode set to: {mode}.");
         RefreshCategories();
     }
 
@@ -766,50 +622,11 @@ public class DynamicCategoryCreator : MonoBehaviour
     {
         columnsCount = Mathf.Max(1, columns);
         SetupGridLayout();
-        ToDebug($"Columns count set to: {columnsCount}");
+        Debug.Log($"[DynamicCategoryCreator] Columns count set to: {columnsCount}.");
+        StartCoroutine(ForceLayoutRefresh());
     }
 
     public int GetSelectedNiveauId() => selectedNiveauId;
     public int GetSelectedTypeId() => selectedTypeId;
-
-    private void ToDebug(string message)
-    {
-        string fullMessage = $"[DynamicCategoryCreator] {message}";
-        Debug.Log(fullMessage);
-        
-        if (debugText != null)
-        {
-            debugText.text += System.Environment.NewLine + fullMessage;
-        }
-    }
-
-    // Méthodes de test
-    [ContextMenu("Test - Refresh Categories")]
-    public void TestRefreshCategories() => RefreshCategories();
-
-    [ContextMenu("Test - Switch to Niveau Only")]
-    public void TestNiveauOnly() => SetDisplayMode(CategoryDisplayMode.NiveauOnly);
-
-    [ContextMenu("Test - Switch to Type Only")]  
-    public void TestTypeOnly() => SetDisplayMode(CategoryDisplayMode.TypeOnly);
-
-    [ContextMenu("Test - Switch to Mixed")]
-    public void TestMixed() => SetDisplayMode(CategoryDisplayMode.Mixed);
-
-    [ContextMenu("Test - Create Test Buttons")]
-    public void TestCreateTestButtons() => CreateTestButtons();
-
-    [ContextMenu("Test - Validate UI References")]
-    public void TestValidateUI() => ValidateUIReferences();
-
-    [ContextMenu("Test - Log Buttons Status")]
-    public void TestLogButtons() => LogCategoryButtonsStatus();
-
-    [ContextMenu("Test - Force Initialize")]
-    public void TestForceInitialize()
-    {
-        ToDebug("Force initialize requested");
-        StopAllCoroutines();
-        StartCoroutine(InitializeWithDelay());
-    }
+    public bool IsNoCategorySelected() => selectedNiveauId == -1 && selectedTypeId == -1;
 }

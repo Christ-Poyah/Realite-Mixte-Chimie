@@ -332,10 +332,10 @@ MonoBehaviour:
   m_MultiSelect: 0
   m_Options:
     m_Options:
-    - m_Text: Types
+    - m_Text: Niveaux
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
-    - m_Text: Niveaux
+    - m_Text: Types
       m_Image: {fileID: 0}
       m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_OnValueChanged:
@@ -2290,6 +2290,54 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Renderer: {fileID: 1291399511}
   m_MaterialIndex: 0
+--- !u!1 &771197381
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 771197383}
+  - component: {fileID: 771197382}
+  m_Layer: 0
+  m_Name: DatabaseManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &771197382
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771197381}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: efc884dba343042fdbb30c03422cf5b2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  databaseName: chemistry_experiments.db
+  forceRecreateDatabase: 0
+  createDatabaseOnStart: 0
+  enableDebugLogs: 1
+--- !u!4 &771197383
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 771197381}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -0.05207, y: 1.047, z: -0.06073}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &798337360
 GameObject:
   m_ObjectHideFlags: 0
@@ -2550,7 +2598,7 @@ GameObject:
   - component: {fileID: 970691827}
   - component: {fileID: 970691826}
   m_Layer: 5
-  m_Name: Alcane button (5)
+  m_Name: Aide
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3472,11 +3520,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 73102262534702633, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_SizeDelta.x
-      value: 563.78
+      value: 931.22
       objectReference: {fileID: 0}
     - target: {fileID: 73102262534702633, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_SizeDelta.y
-      value: 400.89
+      value: 400.9
       objectReference: {fileID: 0}
     - target: {fileID: 73102262534702633, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       propertyPath: m_AnchoredPosition.x
@@ -3964,9 +4012,6 @@ PrefabInstance:
       addedObject: {fileID: 1852270622}
     - targetCorrespondingSourceObject: {fileID: 7158865763779469689, guid: 66d40221d132d04499855da9ce315f20, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 1364055692}
-    - targetCorrespondingSourceObject: {fileID: 7158865763779469689, guid: 66d40221d132d04499855da9ce315f20, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 1364055694}
   m_SourcePrefab: {fileID: 100100000, guid: 66d40221d132d04499855da9ce315f20, type: 3}
 --- !u!4 &1364055690 stripped
@@ -3979,18 +4024,6 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 73102262534702633, guid: 66d40221d132d04499855da9ce315f20, type: 3}
   m_PrefabInstance: {fileID: 1364055689}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &1364055692
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 532264445}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff54a6648e71f4b818a8342af2810739, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &1364055693 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1435055189130710449, guid: 66d40221d132d04499855da9ce315f20, type: 3}
@@ -4016,17 +4049,17 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   categoryButtonPrefab: {fileID: 7410626160700074993, guid: 96ce29bf31e66436b95404e9870d556e, type: 3}
   categoriesParent: {fileID: 1364055691}
-  debugText: {fileID: 0}
+  displayModeDropdown: {fileID: 90670556}
   showNiveauCategories: 1
   showTypeCategories: 1
-  displayMode: 2
+  initialDisplayMode: 0
   columnsCount: 4
   spacing: 10
   cellSize: {x: 300, y: 100}
-  initializationDelay: 0.1
   niveauCategoryColor: {r: 0.2, g: 0.6, b: 1, a: 1}
   typeCategoryColor: {r: 1, g: 0.6, b: 0.2, a: 1}
   selectedCategoryColor: {r: 0.1, g: 0.8, b: 0.3, a: 1}
+  databaseManagerReference: {fileID: 771197382}
 --- !u!1 &1470893327
 GameObject:
   m_ObjectHideFlags: 0
@@ -4292,7 +4325,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Types
+  m_text: Niveaux
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -5871,3 +5904,4 @@ SceneRoots:
   - {fileID: 2540456819257962235}
   - {fileID: 2073726594}
   - {fileID: 1184509328}
+  - {fileID: 771197383}
