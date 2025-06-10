@@ -5172,6 +5172,10 @@ PrefabInstance:
       propertyPath: m_LocalPosition.y
       value: -0.222
       objectReference: {fileID: 0}
+    - target: {fileID: 6431073450482620770, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -0.24
+      objectReference: {fileID: 0}
     - target: {fileID: 9119545848555334746, guid: 1782b89ac15b3c34cbc28f0ede57d895, type: 3}
       propertyPath: m_OnARPlaneFeatureChanged.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 

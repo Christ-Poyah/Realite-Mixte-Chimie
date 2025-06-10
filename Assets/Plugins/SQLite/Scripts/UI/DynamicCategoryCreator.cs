@@ -21,7 +21,7 @@ public class DynamicCategoryCreator : MonoBehaviour
     [Header("Layout Settings")]
     public int columnsCount = 4;
     public float spacing = 10f;
-    public Vector2 cellSize = new Vector2(300f, 100f);
+    // Suppression de cellSize - sera calculé automatiquement
 
     [Header("Visual Settings")]
     public Color niveauCategoryColor = new Color(0.2f, 0.6f, 1f, 1f);
@@ -75,10 +75,11 @@ public class DynamicCategoryCreator : MonoBehaviour
              return;
         }
 
-        // CORRECTION 1: Vérifier et corriger le parent avant de configurer le layout
         ValidateAndFixParentSetup();
-
         SetupGridLayout();
+
+        // CORRECTION 1: Initialiser currentDisplayMode AVANT de configurer le dropdown
+        currentDisplayMode = initialDisplayMode;
 
         if (displayModeDropdown != null)
         {
@@ -87,17 +88,15 @@ public class DynamicCategoryCreator : MonoBehaviour
         else
         {
             Debug.LogWarning("[DynamicCategoryCreator] Display Mode Dropdown is not assigned. Using initialDisplayMode setting and initializing directly.");
-            currentDisplayMode = initialDisplayMode;
+            // CORRECTION 2: Charger les boutons immédiatement après l'initialisation
             LoadAndCreateCategoryButtons();
         }
     }
 
-    // CORRECTION 2: Nouvelle méthode pour valider et corriger la configuration du parent
     void ValidateAndFixParentSetup()
     {
         if (categoriesParent == null) return;
 
-        // Vérifier que le parent a un RectTransform
         RectTransform parentRect = categoriesParent.GetComponent<RectTransform>();
         if (parentRect == null)
         {
@@ -105,14 +104,12 @@ public class DynamicCategoryCreator : MonoBehaviour
             return;
         }
 
-        // Activer le GameObject parent s'il est désactivé
         if (!categoriesParent.gameObject.activeInHierarchy)
         {
             Debug.LogWarning("[DynamicCategoryCreator] CategoriesParent was inactive. Activating it.");
             categoriesParent.gameObject.SetActive(true);
         }
 
-        // Vérifier la taille du parent
         if (parentRect.sizeDelta.x <= 0 || parentRect.sizeDelta.y <= 0)
         {
             Debug.LogWarning($"[DynamicCategoryCreator] Parent RectTransform has zero size: {parentRect.sizeDelta}. This may cause display issues.");
@@ -125,7 +122,6 @@ public class DynamicCategoryCreator : MonoBehaviour
     {
         if (categoriesParent == null) return;
 
-        // Supprimer les composants conflictuels
         var existingSizeFitter = categoriesParent.GetComponent<ContentSizeFitter>();
         if (existingSizeFitter != null)
         {
@@ -143,8 +139,10 @@ public class DynamicCategoryCreator : MonoBehaviour
             Debug.Log("[DynamicCategoryCreator] Added GridLayoutGroup.");
         }
 
-        // Configuration du GridLayoutGroup
-        gridLayout.cellSize = cellSize;
+        // CORRECTION 3: Calcul automatique de la taille des cellules
+        Vector2 calculatedCellSize = CalculateOptimalCellSize();
+        
+        gridLayout.cellSize = calculatedCellSize;
         gridLayout.spacing = new Vector2(spacing, spacing);
         gridLayout.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
         gridLayout.constraintCount = columnsCount;
@@ -152,24 +150,87 @@ public class DynamicCategoryCreator : MonoBehaviour
         gridLayout.startCorner = GridLayoutGroup.Corner.UpperLeft;
         gridLayout.startAxis = GridLayoutGroup.Axis.Horizontal;
 
-        // CORRECTION 3: Configuration améliorée du RectTransform parent
         var rectTransform = categoriesParent.GetComponent<RectTransform>();
         if (rectTransform != null)
         {
-            // Configuration pour expansion verticale
             rectTransform.anchorMin = new Vector2(0, 1);
             rectTransform.anchorMax = new Vector2(1, 1);
             rectTransform.pivot = new Vector2(0.5f, 1);
             rectTransform.anchoredPosition = new Vector2(0, 0);
             
-            // S'assurer qu'il y a assez d'espace
             if (rectTransform.sizeDelta.x <= 0)
             {
                 rectTransform.sizeDelta = new Vector2(800f, rectTransform.sizeDelta.y);
             }
         }
 
-        Debug.Log("[DynamicCategoryCreator] Grid layout setup complete.");
+        Debug.Log($"[DynamicCategoryCreator] Grid layout setup complete with calculated cell size: {calculatedCellSize}");
+    }
+
+    // CORRECTION 4: Nouvelle méthode pour calculer la taille optimale des cellules (MISE À JOUR)
+    private Vector2 CalculateOptimalCellSize()
+    {
+        if (categoriesParent == null) return new Vector2(200f, 80f);
+
+        RectTransform parentRect = categoriesParent.GetComponent<RectTransform>();
+        if (parentRect == null) return new Vector2(200f, 80f);
+
+        float availableWidth = 0f;
+        
+        // Méthode 1: Utiliser rect.width si disponible
+        if (parentRect.rect.width > 0)
+        {
+            availableWidth = parentRect.rect.width;
+        }
+        // Méthode 2: Utiliser sizeDelta.x si disponible
+        else if (parentRect.sizeDelta.x > 0)
+        {
+            availableWidth = parentRect.sizeDelta.x;
+        }
+        // Méthode 3: Essayer de calculer depuis le parent
+        else if (parentRect.parent != null)
+        {
+            RectTransform grandParent = parentRect.parent.GetComponent<RectTransform>();
+            if (grandParent != null && grandParent.rect.width > 0)
+            {
+                availableWidth = grandParent.rect.width;
+            }
+        }
+        
+        // Méthode 4: Utiliser Canvas comme référence
+        if (availableWidth <= 0)
+        {
+            Canvas canvas = GetComponentInParent<Canvas>();
+            if (canvas != null)
+            {
+                RectTransform canvasRect = canvas.GetComponent<RectTransform>();
+                if (canvasRect != null && canvasRect.rect.width > 0)
+                {
+                    availableWidth = canvasRect.rect.width * 0.8f; // 80% de la largeur du canvas
+                }
+            }
+        }
+        
+        // Valeur par défaut si aucune méthode ne fonctionne
+        if (availableWidth <= 0)
+        {
+            availableWidth = 800f;
+        }
+
+        // Calculer la largeur des cellules en tenant compte du spacing
+        float totalSpacing = spacing * (columnsCount - 1);
+        float cellWidth = (availableWidth - totalSpacing) / columnsCount;
+        
+        // S'assurer que la largeur n'est pas trop petite ou trop grande
+        cellWidth = Mathf.Clamp(cellWidth, 120f, 300f);
+        
+        // Hauteur proportionnelle (ratio adaptatif)
+        float cellHeight = cellWidth * 0.35f;
+        cellHeight = Mathf.Clamp(cellHeight, 50f, 120f);
+
+        Debug.Log($"[DynamicCategoryCreator] Calculated cell size: {cellWidth}x{cellHeight} (available width: {availableWidth})");
+        
+        return new Vector2(cellWidth, cellHeight);
     }
 
     void LoadAllCategoriesData()
@@ -235,9 +296,11 @@ public class DynamicCategoryCreator : MonoBehaviour
         if (initialIndex < 0 || initialIndex >= options.Count) initialIndex = 0;
 
         displayModeDropdown.value = initialIndex;
-        OnDisplayModeDropdownChanged(initialIndex);
+        
+        // CORRECTION 5: Charger les boutons immédiatement après la configuration du dropdown
+        LoadAndCreateCategoryButtons();
 
-        Debug.Log("[DynamicCategoryCreator] Dropdown setup complete. Initial mode display triggered.");
+        Debug.Log("[DynamicCategoryCreator] Dropdown setup complete. Categories loaded for initial mode.");
     }
 
     private void OnDisplayModeDropdownChanged(int index)
@@ -267,6 +330,7 @@ public class DynamicCategoryCreator : MonoBehaviour
         SetDisplayMode(newMode);
     }
 
+    // MISE À JOUR de LoadAndCreateCategoryButtons()
     void LoadAndCreateCategoryButtons()
     {
         if (dataService == null || !ValidateUIReferences()) return;
@@ -274,6 +338,9 @@ public class DynamicCategoryCreator : MonoBehaviour
         Debug.Log($"[DynamicCategoryCreator] Clearing existing buttons and creating buttons for mode: {currentDisplayMode}");
 
         ClearExistingButtons();
+
+        // CORRECTION : Recalculer la taille des cellules avant de créer les boutons
+        UpdateGridLayoutCellSize();
 
         int buttonsCreatedCount = 0;
 
@@ -315,10 +382,37 @@ public class DynamicCategoryCreator : MonoBehaviour
              Debug.Log($"[DynamicCategoryCreator] Total buttons created: {buttonsCreatedCount}.");
         }
 
-        StartCoroutine(ForceLayoutRefresh());
+        // Commencer le recalcul et le refresh du layout
+        StartCoroutine(RecalculateCellSizeAfterLayout());
     }
 
-    // CORRECTION 4: Amélioration de la création des boutons avec validation
+    // CORRECTION 7: Nouvelle méthode pour mettre à jour la taille des cellules du grid
+    private void UpdateGridLayoutCellSize()
+    {
+        if (categoriesParent == null) return;
+
+        var gridLayout = categoriesParent.GetComponent<GridLayoutGroup>();
+        if (gridLayout != null)
+        {
+            Vector2 newCellSize = CalculateOptimalCellSize();
+            gridLayout.cellSize = newCellSize;
+            Debug.Log($"[DynamicCategoryCreator] Updated grid layout cell size to: {newCellSize}");
+        }
+    }
+
+    // NOUVELLE MÉTHODE: Recalculer après que le layout soit établi
+    private IEnumerator RecalculateCellSizeAfterLayout()
+    {
+        // Attendre plusieurs frames pour que le layout soit complètement établi
+        yield return new WaitForEndOfFrame();
+        yield return new WaitForEndOfFrame();
+        
+        UpdateGridLayoutCellSize();
+        
+        // Forcer une autre mise à jour du layout
+        yield return StartCoroutine(ForceLayoutRefresh());
+    }
+
     private void CreateNiveauCategoryButton(CategorieNiveau category)
     {
         if (category == null || !ValidateUIReferences() || categoryButtonPrefab == null || categoriesParent == null) return;
@@ -327,11 +421,8 @@ public class DynamicCategoryCreator : MonoBehaviour
 
         var button = Instantiate(categoryButtonPrefab, categoriesParent);
         button.name = $"NiveauButton_{category.IdCategNiv}";
-        
-        // CORRECTION: S'assurer que le bouton est actif
         button.SetActive(true);
 
-        // Vérifier que le bouton a été correctement créé
         if (button.transform.parent != categoriesParent)
         {
             Debug.LogError($"[DynamicCategoryCreator] Button parent assignment failed for {category.TitreCategNiv}");
@@ -404,13 +495,17 @@ public class DynamicCategoryCreator : MonoBehaviour
         }
     }
 
-    // CORRECTION 5: Amélioration de la configuration du texte avec plus de logs
     private void SetButtonText(GameObject button, string text)
     {
         var tmpText = button.GetComponentInChildren<TextMeshProUGUI>();
         if (tmpText != null)
         {
             tmpText.text = text;
+            // Ajuster la taille de police pour s'adapter aux cellules plus petites
+            tmpText.fontSize = Mathf.Min(tmpText.fontSize, 14f);
+            tmpText.enableAutoSizing = true;
+            tmpText.fontSizeMin = 8f;
+            tmpText.fontSizeMax = 14f;
             Debug.Log($"[DynamicCategoryCreator] Set TextMeshPro text to '{text}' for button {button.name}");
             return;
         }
@@ -419,6 +514,7 @@ public class DynamicCategoryCreator : MonoBehaviour
         if (legacyText != null)
         {
             legacyText.text = text;
+            legacyText.fontSize = Mathf.Min(legacyText.fontSize, 14);
             Debug.Log($"[DynamicCategoryCreator] Set legacy Text to '{text}' for button {button.name}");
         }
         else
@@ -457,7 +553,6 @@ public class DynamicCategoryCreator : MonoBehaviour
         Debug.Log($"[DynamicCategoryCreator] Cleared {childCount} existing category buttons.");
     }
 
-    // CORRECTION 6: Amélioration du refresh du layout
     private IEnumerator ForceLayoutRefresh()
     {
         yield return null;
@@ -481,7 +576,6 @@ public class DynamicCategoryCreator : MonoBehaviour
                     }
                 }
 
-                // Log des informations de debug après le refresh
                 Debug.Log($"[DynamicCategoryCreator] Layout refresh completed. Children count: {categoriesParent.childCount}, Parent size: {rectTransform.sizeDelta}");
             }
         }
