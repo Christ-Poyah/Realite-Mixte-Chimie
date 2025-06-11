@@ -558,6 +558,11 @@ public class DynamicCategoryCreator : MonoBehaviour
         selectedTypeId = -1;
     }
 
+<<<<<<< Updated upstream
+=======
+    
+
+>>>>>>> Stashed changes
     public int GetSelectedNiveauId() => selectedNiveauId;
     public int GetSelectedTypeId() => selectedTypeId;
     public bool IsNoCategorySelected() => selectedNiveauId == -1 && selectedTypeId == -1;

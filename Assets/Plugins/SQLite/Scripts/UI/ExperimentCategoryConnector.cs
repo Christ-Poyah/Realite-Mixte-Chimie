@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class ExperimentCategoryConnector : MonoBehaviour
 {
@@ -8,6 +9,9 @@ public class ExperimentCategoryConnector : MonoBehaviour
     
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = true;
+    
+    [Header("Timing Settings")]
+    [SerializeField] private float filterDelayBeforeNavigation = 0.1f; // Délai avant navigation
 
     void Start()
     {
@@ -51,23 +55,64 @@ public class ExperimentCategoryConnector : MonoBehaviour
     {
         DebugLog($"Niveau category selected: {niveauId}");
         
-        if (experimentCreator != null)
-        {
-            // Filtrer les expériences par niveau
-            experimentCreator.FilterExperimentsByNiveau(niveauId);
-        }
+        // Appliquer le filtre puis naviguer
+        StartCoroutine(FilterAndNavigate(() => {
+            if (experimentCreator != null)
+            {
+                experimentCreator.FilterExperimentsByNiveau(niveauId);
+            }
+        }));
     }
 
     private void OnTypeCategorySelected(int typeId)
     {
         DebugLog($"Type category selected: {typeId}");
         
-        if (experimentCreator != null)
+        // Appliquer le filtre puis naviguer
+        StartCoroutine(FilterAndNavigate(() => {
+            if (experimentCreator != null)
+            {
+                experimentCreator.FilterExperimentsByType(typeId);
+            }
+        }));
+    }
+    
+    private IEnumerator FilterAndNavigate(System.Action filterAction)
+    {
+        // Appliquer le filtre d'abord
+        filterAction?.Invoke();
+        
+        // Attendre un peu pour s'assurer que le filtrage est terminé
+        yield return new WaitForSeconds(filterDelayBeforeNavigation);
+        
+        // Puis naviguer vers l'écran des expériences
+        if (screenManager != null)
         {
-            // Filtrer les expériences par type
-            experimentCreator.FilterExperimentsByType(typeId);
+            screenManager.NavigateToExperimentsAfterFiltering();
         }
     }
+<<<<<<< Updated upstream
+=======
+    
+    private void OnScreenChanged(UIScreenManager.CurrentScreen newScreen)
+    {
+        DebugLog($"Screen changed to: {newScreen}");
+        
+        // Logique supplémentaire selon l'écran actuel
+        switch (newScreen)
+        {
+            case UIScreenManager.CurrentScreen.Categories:
+                // Optionnel : réinitialiser les filtres ou autres actions
+                break;
+                
+            case UIScreenManager.CurrentScreen.Experiments:
+                // NE PAS rafraîchir ici car cela annulerait le filtre !
+                // Le filtrage a déjà été appliqué avant la navigation
+                DebugLog("Navigated to experiments screen - keeping current filter");
+                break;
+        }
+    }
+>>>>>>> Stashed changes
 
     private void DebugLog(string message)
     {
@@ -119,4 +164,30 @@ public class ExperimentCategoryConnector : MonoBehaviour
             ResetExperimentFilter();
         }
     }
+<<<<<<< Updated upstream
+=======
+    
+    // Nouvelle méthode pour revenir aux catégories
+    public void BackToCategories()
+    {
+        if (screenManager != null)
+        {
+            screenManager.ShowCategoryScreen();
+        }
+    }
+    
+    // Méthode pour aller directement aux expériences (avec reset du filtre)
+    public void GoToExperimentsWithoutFilter()
+    {
+        if (experimentCreator != null)
+        {
+            experimentCreator.RefreshExperiments(); // Reset des filtres
+        }
+        
+        if (screenManager != null)
+        {
+            screenManager.ShowExperimentScreen();
+        }
+    }
+>>>>>>> Stashed changes
 }
