@@ -6,6 +6,7 @@ public class ExperimentCategoryConnector : MonoBehaviour
     [Header("Script References")]
     [SerializeField] private DynamicCategoryCreator categoryCreator;
     [SerializeField] private DynamicExperimentCreator experimentCreator;
+    [SerializeField] private UIScreenManager screenManager;
     
     [Header("Debug")]
     [SerializeField] private bool enableDebugLogs = true;
@@ -36,8 +37,21 @@ public class ExperimentCategoryConnector : MonoBehaviour
             }
         }
 
+        if (screenManager == null)
+        {
+            screenManager = FindObjectOfType<UIScreenManager>();
+            if (screenManager == null)
+            {
+                Debug.LogError("[ExperimentCategoryConnector] UIScreenManager not found!");
+                return;
+            }
+        }
+
         // S'abonner aux événements de sélection de catégorie
         SetupCategoryEventListeners();
+        
+        // S'abonner aux événements du screen manager
+        SetupScreenManagerEventListeners();
     }
 
     private void SetupCategoryEventListeners()
@@ -49,6 +63,14 @@ public class ExperimentCategoryConnector : MonoBehaviour
         categoryCreator.OnTypeCategorySelected += OnTypeCategorySelected;
 
         DebugLog("Category event listeners setup completed");
+    }
+    
+    private void SetupScreenManagerEventListeners()
+    {
+        if (screenManager == null) return;
+        
+        screenManager.OnScreenChanged += OnScreenChanged;
+        DebugLog("Screen manager event listeners setup completed");
     }
 
     private void OnNiveauCategorySelected(int niveauId)
@@ -91,8 +113,6 @@ public class ExperimentCategoryConnector : MonoBehaviour
             screenManager.NavigateToExperimentsAfterFiltering();
         }
     }
-<<<<<<< Updated upstream
-=======
     
     private void OnScreenChanged(UIScreenManager.CurrentScreen newScreen)
     {
@@ -112,7 +132,6 @@ public class ExperimentCategoryConnector : MonoBehaviour
                 break;
         }
     }
->>>>>>> Stashed changes
 
     private void DebugLog(string message)
     {
@@ -129,6 +148,11 @@ public class ExperimentCategoryConnector : MonoBehaviour
         {
             categoryCreator.OnNiveauCategorySelected -= OnNiveauCategorySelected;
             categoryCreator.OnTypeCategorySelected -= OnTypeCategorySelected;
+        }
+        
+        if (screenManager != null)
+        {
+            screenManager.OnScreenChanged -= OnScreenChanged;
         }
     }
 
@@ -164,8 +188,6 @@ public class ExperimentCategoryConnector : MonoBehaviour
             ResetExperimentFilter();
         }
     }
-<<<<<<< Updated upstream
-=======
     
     // Nouvelle méthode pour revenir aux catégories
     public void BackToCategories()
@@ -189,5 +211,4 @@ public class ExperimentCategoryConnector : MonoBehaviour
             screenManager.ShowExperimentScreen();
         }
     }
->>>>>>> Stashed changes
 }
