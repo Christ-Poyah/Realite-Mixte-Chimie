@@ -35,8 +35,9 @@ public class DynamicCategoryCreator : MonoBehaviour
     private List<CategorieType> allTypeCategories;
     private CategoryDisplayMode currentDisplayMode;
 
-    public System.Action<int> OnNiveauCategorySelected;
-    public System.Action<int> OnTypeCategorySelected;
+    // Événements modifiés avec paramètre string pour le titre
+    public System.Action<int, string> OnNiveauCategorySelected;
+    public System.Action<int, string> OnTypeCategorySelected;
 
     private int selectedNiveauId = -1;
     private int selectedTypeId = -1;
@@ -469,13 +470,17 @@ public class DynamicCategoryCreator : MonoBehaviour
         return categoryButtonPrefab != null && categoriesParent != null;
     }
 
+    // Méthodes de callback modifiées pour inclure le titre
     private void OnNiveauButtonClick(int categoryId, GameObject button)
     {
         UpdateSelectedButton(button);
         selectedNiveauId = categoryId;
         selectedTypeId = -1;
 
-        OnNiveauCategorySelected?.Invoke(categoryId);
+        // Récupérer le titre de la catégorie
+        string categoryTitle = GetCategoryTitle(categoryId, true); // true pour niveau
+        
+        OnNiveauCategorySelected?.Invoke(categoryId, categoryTitle);
     }
 
     private void OnTypeButtonClick(int categoryId, GameObject button)
@@ -484,7 +489,10 @@ public class DynamicCategoryCreator : MonoBehaviour
         selectedTypeId = categoryId;
         selectedNiveauId = -1;
 
-        OnTypeCategorySelected?.Invoke(categoryId);
+        // Récupérer le titre de la catégorie
+        string categoryTitle = GetCategoryTitle(categoryId, false); // false pour type
+        
+        OnTypeCategorySelected?.Invoke(categoryId, categoryTitle);
     }
 
     private void UpdateSelectedButton(GameObject newSelectedButton)
@@ -525,6 +533,37 @@ public class DynamicCategoryCreator : MonoBehaviour
         SetButtonBaseColor(button, originalColor);
     }
 
+    // Nouvelle méthode pour récupérer le titre d'une catégorie
+    private string GetCategoryTitle(int categoryId, bool isNiveau)
+    {
+        if (isNiveau && allNiveauCategories != null)
+        {
+            var category = allNiveauCategories.FirstOrDefault(c => c.IdCategNiv == categoryId);
+            return category?.TitreCategNiv ?? $"Niveau {categoryId}";
+        }
+        else if (!isNiveau && allTypeCategories != null)
+        {
+            var category = allTypeCategories.FirstOrDefault(c => c.IdCategTyp == categoryId);
+            return category?.TitreCategTyp ?? $"Type {categoryId}";
+        }
+        
+        return $"Catégorie {categoryId}";
+    }
+
+    // Nouvelle méthode publique pour récupérer le titre de la catégorie sélectionnée
+    public string GetSelectedCategoryTitle()
+    {
+        if (selectedNiveauId != -1)
+        {
+            return GetCategoryTitle(selectedNiveauId, true);
+        }
+        else if (selectedTypeId != -1)
+        {
+            return GetCategoryTitle(selectedTypeId, false);
+        }
+        return "";
+    }
+
     public void RefreshCategories()
     {
         if (dataService == null) return;
@@ -557,8 +596,6 @@ public class DynamicCategoryCreator : MonoBehaviour
         selectedNiveauId = -1;
         selectedTypeId = -1;
     }
-
-    
 
     public int GetSelectedNiveauId() => selectedNiveauId;
     public int GetSelectedTypeId() => selectedTypeId;
