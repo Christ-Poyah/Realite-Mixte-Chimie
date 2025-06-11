@@ -11,6 +11,7 @@ public class DynamicExperimentCreator : MonoBehaviour
     public GameObject buttonPrefab;
     public Transform parentTransform;
     public Text debugText;
+    public TextMeshProUGUI descriptionField; // Nouveau champ pour afficher la description
     
     [Header("Settings")]
     public float spacing = 10f;
@@ -107,6 +108,12 @@ public class DynamicExperimentCreator : MonoBehaviour
         {
             ToDebug("CRITICAL ERROR: ParentTransform is NULL");
             return false;
+        }
+        
+        if (descriptionField == null)
+        {
+            ToDebug("WARNING: DescriptionField is NULL - descriptions won't be displayed");
+            // Ne pas retourner false car ce n'est pas critique pour le fonctionnement de base
         }
         
         return true;
@@ -293,6 +300,9 @@ public class DynamicExperimentCreator : MonoBehaviour
     {
         if (parentTransform == null) return;
 
+        // Effacer la description affichée
+        ClearDescription();
+
         int childCount = parentTransform.childCount;
 
         for (int i = childCount - 1; i >= 0; i--)
@@ -315,6 +325,17 @@ public class DynamicExperimentCreator : MonoBehaviour
         if (experiment != null)
         {
             ToDebug($"Experiment selected: {experiment.TitreExp}");
+            
+            // Afficher la description dans le champ Description
+            if (descriptionField != null)
+            {
+                descriptionField.text = experiment.DescriptionExp;
+            }
+            else
+            {
+                ToDebug("Warning: Description field reference is not set");
+            }
+            
             StartExperiment(experiment);
         }
         else
@@ -326,6 +347,14 @@ public class DynamicExperimentCreator : MonoBehaviour
     void StartExperiment(ExperienceChimie experiment)
     {
         ToDebug($"Starting experiment: {experiment.TitreExp}");
+    }
+
+    public void ClearDescription()
+    {
+        if (descriptionField != null)
+        {
+            descriptionField.text = "";
+        }
     }
 
     private bool ValidateInitialization()
