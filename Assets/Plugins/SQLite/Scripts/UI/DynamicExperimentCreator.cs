@@ -359,6 +359,19 @@ public class DynamicExperimentCreator : MonoBehaviour
 
     private bool ValidateInitialization()
     {
+        // CORRECTION PRINCIPALE : Essayer de réinitialiser le DataService s'il est null
+        if (dataService == null && DatabaseManager.Instance != null)
+        {
+            ToDebug("DataService was null, attempting to re-initialize...");
+            dataService = DatabaseManager.Instance.GetDataService();
+            
+            if (dataService != null)
+            {
+                isInitialized = true;
+                ToDebug("DataService successfully re-initialized");
+            }
+        }
+        
         if (dataService == null)
         {
             ToDebug("Error: DataService not initialized");
@@ -407,7 +420,15 @@ public class DynamicExperimentCreator : MonoBehaviour
 
     public void FilterExperimentsByNiveau(int idCategNiv)
     {
-        if (!ValidateInitialization()) return;
+        ToDebug($"FilterExperimentsByNiveau called with ID: {idCategNiv}");
+        
+        if (!ValidateInitialization()) 
+        {
+            ToDebug("Validation failed - attempting delayed filter");
+            // Essayer un filtrage retardé si l'initialisation échoue
+            StartCoroutine(DelayedFilterByNiveau(idCategNiv));
+            return;
+        }
 
         try
         {
@@ -420,8 +441,9 @@ public class DynamicExperimentCreator : MonoBehaviour
                 currentExperiments = dataService.GetExperiencesByNiveau(idCategNiv).ToList();
             }
             
+            ToDebug($"Found {currentExperiments.Count} experiments for niveau {idCategNiv}");
             CreateButtons();
-            ToDebug($"Filtered experiments by niveau ID: {idCategNiv}. Found {currentExperiments.Count} experiments.");
+            ToDebug($"Buttons created successfully for niveau {idCategNiv}");
         }
         catch (System.Exception e)
         {
@@ -429,9 +451,42 @@ public class DynamicExperimentCreator : MonoBehaviour
         }
     }
 
+    // NOUVELLE MÉTHODE : Filtrage retardé pour gérer les problèmes de timing
+    private IEnumerator DelayedFilterByNiveau(int idCategNiv)
+    {
+        ToDebug("Attempting delayed filter...");
+        
+        // Attendre jusqu'à 3 secondes pour que l'initialisation se termine
+        float waitTime = 0f;
+        const float maxWaitTime = 3f;
+        
+        while (waitTime < maxWaitTime && !ValidateInitialization())
+        {
+            yield return new WaitForSeconds(0.1f);
+            waitTime += 0.1f;
+        }
+        
+        if (ValidateInitialization())
+        {
+            ToDebug("Delayed initialization successful, applying filter");
+            FilterExperimentsByNiveau(idCategNiv);
+        }
+        else
+        {
+            ToDebug("ERROR: Delayed initialization failed");
+        }
+    }
+
     public void FilterExperimentsByType(int idCategTyp)
     {
-        if (!ValidateInitialization()) return;
+        ToDebug($"FilterExperimentsByType called with ID: {idCategTyp}");
+        
+        if (!ValidateInitialization()) 
+        {
+            ToDebug("Validation failed - attempting delayed filter");
+            StartCoroutine(DelayedFilterByType(idCategTyp));
+            return;
+        }
 
         try
         {
@@ -444,12 +499,38 @@ public class DynamicExperimentCreator : MonoBehaviour
                 currentExperiments = dataService.GetExperiencesByType(idCategTyp).ToList();
             }
             
+            ToDebug($"Found {currentExperiments.Count} experiments for type {idCategTyp}");
             CreateButtons();
-            ToDebug($"Filtered experiments by type ID: {idCategTyp}. Found {currentExperiments.Count} experiments.");
+            ToDebug($"Buttons created successfully for type {idCategTyp}");
         }
         catch (System.Exception e)
         {
             ToDebug($"Error filtering experiments by type: {e.Message}");
+        }
+    }
+
+    // NOUVELLE MÉTHODE : Filtrage retardé pour les types
+    private IEnumerator DelayedFilterByType(int idCategTyp)
+    {
+        ToDebug("Attempting delayed filter by type...");
+        
+        float waitTime = 0f;
+        const float maxWaitTime = 3f;
+        
+        while (waitTime < maxWaitTime && !ValidateInitialization())
+        {
+            yield return new WaitForSeconds(0.1f);
+            waitTime += 0.1f;
+        }
+        
+        if (ValidateInitialization())
+        {
+            ToDebug("Delayed initialization successful, applying type filter");
+            FilterExperimentsByType(idCategTyp);
+        }
+        else
+        {
+            ToDebug("ERROR: Delayed type filter initialization failed");
         }
     }
 
@@ -467,6 +548,21 @@ public class DynamicExperimentCreator : MonoBehaviour
         {
             ToDebug($"Error filtering experiments by niveau and type: {e.Message}");
         }
+    }
+
+    // NOUVELLE MÉTHODE : Pour vérifier l'état d'initialisation depuis l'extérieur
+    public bool IsInitialized()
+    {
+        return isInitialized && dataService != null;
+    }
+
+    // NOUVELLE MÉTHODE : Forcer la réinitialisation
+    public void ForceReinitialize()
+    {
+        ToDebug("Force reinitialize requested");
+        isInitialized = false;
+        dataService = null;
+        StartCoroutine(InitializeWithDelay());
     }
 
     private void ToDebug(string message)

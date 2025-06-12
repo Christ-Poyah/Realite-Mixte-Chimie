@@ -7883,6 +7883,7 @@ MonoBehaviour:
   categoryButtonPrefab: {fileID: 7410626160700074993, guid: 96ce29bf31e66436b95404e9870d556e, type: 3}
   categoriesParent: {fileID: 1364055691}
   displayModeDropdown: {fileID: 90670556}
+  backButtonText: {fileID: 2075209913}
   showNiveauCategories: 1
   showTypeCategories: 1
   initialDisplayMode: 0
@@ -10174,8 +10175,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -175, y: 5.1}
-  m_SizeDelta: {x: 62.02, y: 20.46}
+  m_AnchoredPosition: {x: -154.54, y: 5.1}
+  m_SizeDelta: {x: 102.94, y: 20.46}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &2075209913
 MonoBehaviour:

@@ -11,6 +11,7 @@ public class DynamicCategoryCreator : MonoBehaviour
     public GameObject categoryButtonPrefab;
     public Transform categoriesParent;
     public TMPro.TMP_Dropdown displayModeDropdown;
+    public TextMeshProUGUI backButtonText; // NOUVEAU : Référence vers le bouton retour
 
     [Header("Category Display Settings")]
     public bool showNiveauCategories = true;
@@ -470,7 +471,7 @@ public class DynamicCategoryCreator : MonoBehaviour
         return categoryButtonPrefab != null && categoriesParent != null;
     }
 
-    // Méthodes de callback modifiées pour inclure le titre
+    // MÉTHODES MODIFIÉES : Incluent maintenant la mise à jour du bouton retour
     private void OnNiveauButtonClick(int categoryId, GameObject button)
     {
         UpdateSelectedButton(button);
@@ -479,6 +480,9 @@ public class DynamicCategoryCreator : MonoBehaviour
 
         // Récupérer le titre de la catégorie
         string categoryTitle = GetCategoryTitle(categoryId, true); // true pour niveau
+        
+        // NOUVEAU : Mettre à jour le bouton retour
+        UpdateBackButton(categoryTitle);
         
         OnNiveauCategorySelected?.Invoke(categoryId, categoryTitle);
     }
@@ -492,7 +496,19 @@ public class DynamicCategoryCreator : MonoBehaviour
         // Récupérer le titre de la catégorie
         string categoryTitle = GetCategoryTitle(categoryId, false); // false pour type
         
+        // NOUVEAU : Mettre à jour le bouton retour
+        UpdateBackButton(categoryTitle);
+        
         OnTypeCategorySelected?.Invoke(categoryId, categoryTitle);
+    }
+
+    // NOUVELLE MÉTHODE : Met à jour le texte du bouton retour
+    private void UpdateBackButton(string categoryTitle)
+    {
+        if (backButtonText != null)
+        {
+            backButtonText.text = "← " + categoryTitle;
+        }
     }
 
     private void UpdateSelectedButton(GameObject newSelectedButton)

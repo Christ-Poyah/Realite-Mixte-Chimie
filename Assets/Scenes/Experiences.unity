@@ -10263,6 +10263,7 @@ MonoBehaviour:
   buttonPrefab: {fileID: 3032190214912660646, guid: 4747a11a947684667b43736055bce1e1, type: 3}
   parentTransform: {fileID: 2075950430}
   debugText: {fileID: 0}
+  descriptionField: {fileID: 0}
   spacing: 10
   initializationDelay: 0.5
   buttonHeight: 60
