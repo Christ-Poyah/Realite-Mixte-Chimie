@@ -18,6 +18,10 @@ public class DynamicCategoryCreator : MonoBehaviour
     [Header("Search")]
     public TMP_InputField searchInputField; // barre de recherche.
 
+    [Header("Help UI")]
+    public Button helpButton;            // le bouton Aide
+    public GameObject helpPanel;  
+
     [Header("Category Display Settings")]
     public bool showNiveauCategories = true;
     public bool showTypeCategories = true;
@@ -78,12 +82,30 @@ public class DynamicCategoryCreator : MonoBehaviour
              return;
         }
 
+          if (helpPanel != null)
+        helpPanel.SetActive(false);
+
+        // 2) Abonne le bouton Aide
+        if (helpButton != null)
+        {
+            helpButton.onClick.RemoveAllListeners();
+            helpButton.onClick.AddListener(OnHelpButtonClicked);
+        }
+
         ValidateAndFixParentSetup();
         currentDisplayMode = initialDisplayMode;
         
         // Attendre que le layout soit prêt avant de créer les boutons
         StartCoroutine(InitializeAfterLayout());
     }
+
+    private void OnHelpButtonClicked()
+{
+    if (helpPanel == null) return;
+    // Toggle (affiche si caché, cache si affiché)
+    bool isActive = helpPanel.activeSelf;
+    helpPanel.SetActive(!isActive);
+}
 
     private IEnumerator InitializeAfterLayout()
     {
