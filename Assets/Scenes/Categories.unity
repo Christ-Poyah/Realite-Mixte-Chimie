@@ -1769,6 +1769,7 @@ MonoBehaviour:
   parentTransform: {fileID: 368642631}
   debugText: {fileID: 0}
   descriptionField: {fileID: 207249647}
+  dureeField: {fileID: 0}
   spacing: 10
   initializationDelay: 0.5
   buttonHeight: 60

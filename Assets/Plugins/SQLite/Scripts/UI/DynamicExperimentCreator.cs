@@ -12,6 +12,8 @@ public class DynamicExperimentCreator : MonoBehaviour
     public Transform parentTransform;
     public Text debugText;
     public TextMeshProUGUI descriptionField; // Nouveau champ pour afficher la description
+
+
     
     [Header("Settings")]
     public float spacing = 10f;
@@ -233,6 +235,7 @@ public class DynamicExperimentCreator : MonoBehaviour
             leftText.text = experiment.TitreExp;
             leftText.fontSize = 14f;
             leftText.alignment = TextAlignmentOptions.Left;
+            leftText.margin = new Vector4(0f, 0f, 03f, 0f); //permettre une marge dans le positionnement
         }
         else 
         {
@@ -247,9 +250,14 @@ public class DynamicExperimentCreator : MonoBehaviour
         {
             rightText.text = experiment.Duree;
             rightText.fontSize = 12f;
-            rightText.alignment = TextAlignmentOptions.Right;
-        }
-    }
+            rightText.alignment = TextAlignmentOptions.Left;
+            // Passe le texte en rouge
+            rightText.color = Color.white;
+            
+        }else{
+                ToDebug("RightText component not found in button prefab!");
+}
+            }
     
     private void SetupButtonClick(GameObject button, ExperienceChimie experiment)
     {
