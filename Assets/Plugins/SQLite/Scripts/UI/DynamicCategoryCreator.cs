@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 
+
+
 public class DynamicCategoryCreator : MonoBehaviour
 {
     [Header("UI References")]
@@ -12,6 +14,9 @@ public class DynamicCategoryCreator : MonoBehaviour
     public Transform categoriesParent;
     public TMPro.TMP_Dropdown displayModeDropdown;
     public TextMeshProUGUI backButtonText; // NOUVEAU : Référence vers le bouton retour
+
+    [Header("Search")]
+    public TMP_InputField searchInputField; // barre de recherche.
 
     [Header("Category Display Settings")]
     public bool showNiveauCategories = true;
@@ -98,10 +103,60 @@ public class DynamicCategoryCreator : MonoBehaviour
             LoadAndCreateCategoryButtons();
         }
         
+        if (searchInputField != null)
+        {
+            // Dès qu’on tape, on appelle OnSearchTextChanged
+            searchInputField.onValueChanged.RemoveAllListeners();
+            searchInputField.onValueChanged.AddListener(OnSearchTextChanged);
+        }
+
         // Forcer un recalcul après l'initialisation complète
         yield return new WaitForSeconds(0.1f);
         ForceCompleteRecalculation();
+
     }
+
+    /// <summary>
+/// Filtre les catégories affichées selon le texte tapé.
+/// </summary>
+private void OnSearchTextChanged(string search)
+{
+    // Si la recherche est vide, on recharge tout normalement
+    if (string.IsNullOrWhiteSpace(search))
+    {
+        LoadAndCreateCategoryButtons();
+        return;
+    }
+
+    // Sinon on filtre selon le mode courant
+    string lower = search.Trim().ToLowerInvariant();
+    ClearExistingButtons();
+
+    switch (currentDisplayMode)
+    {
+        case CategoryDisplayMode.NiveauOnly:
+            foreach (var cat in allNiveauCategories
+                     .Where(c => c.TitreCategNiv != null &&
+                                 c.TitreCategNiv.ToLowerInvariant().Contains(lower)))
+            {
+                CreateNiveauCategoryButton(cat);
+            }
+            break;
+
+        case CategoryDisplayMode.TypeOnly:
+            foreach (var cat in allTypeCategories
+                     .Where(c => c.TitreCategTyp != null &&
+                                 c.TitreCategTyp.ToLowerInvariant().Contains(lower)))
+            {
+                CreateTypeCategoryButton(cat);
+            }
+            break;
+    }
+
+    // On force le layout
+    StartCoroutine(ForceLayoutRefresh());
+}
+
 
     void ValidateAndFixParentSetup()
     {
