@@ -507,7 +507,7 @@ public class DynamicCategoryCreator : MonoBehaviour
     {
         if (backButtonText != null)
         {
-            backButtonText.text = "← " + categoryTitle;
+            backButtonText.text = categoryTitle;
         }
     }
 
