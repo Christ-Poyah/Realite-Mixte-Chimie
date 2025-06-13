@@ -5,12 +5,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Collections;
 
+
+
 public class DynamicCategoryCreator : MonoBehaviour
 {
     [Header("UI References")]
     public GameObject categoryButtonPrefab;
     public Transform categoriesParent;
     public TMPro.TMP_Dropdown displayModeDropdown;
+    public TextMeshProUGUI backButtonText; // NOUVEAU : Référence vers le bouton retour
+
+    [Header("Search")]
+    public TMP_InputField searchInputField; // barre de recherche.
+
+    [Header("Help UI")]
+    public Button helpButton;            // le bouton Aide
+    public GameObject helpPanel;  
 
     [Header("Category Display Settings")]
     public bool showNiveauCategories = true;
@@ -72,12 +82,30 @@ public class DynamicCategoryCreator : MonoBehaviour
              return;
         }
 
+          if (helpPanel != null)
+        helpPanel.SetActive(false);
+
+        // 2) Abonne le bouton Aide
+        if (helpButton != null)
+        {
+            helpButton.onClick.RemoveAllListeners();
+            helpButton.onClick.AddListener(OnHelpButtonClicked);
+        }
+
         ValidateAndFixParentSetup();
         currentDisplayMode = initialDisplayMode;
         
         // Attendre que le layout soit prêt avant de créer les boutons
         StartCoroutine(InitializeAfterLayout());
     }
+
+    private void OnHelpButtonClicked()
+{
+    if (helpPanel == null) return;
+    // Toggle (affiche si caché, cache si affiché)
+    bool isActive = helpPanel.activeSelf;
+    helpPanel.SetActive(!isActive);
+}
 
     private IEnumerator InitializeAfterLayout()
     {
@@ -97,10 +125,60 @@ public class DynamicCategoryCreator : MonoBehaviour
             LoadAndCreateCategoryButtons();
         }
         
+        if (searchInputField != null)
+        {
+            // Dès qu’on tape, on appelle OnSearchTextChanged
+            searchInputField.onValueChanged.RemoveAllListeners();
+            searchInputField.onValueChanged.AddListener(OnSearchTextChanged);
+        }
+
         // Forcer un recalcul après l'initialisation complète
         yield return new WaitForSeconds(0.1f);
         ForceCompleteRecalculation();
+
     }
+
+    /// <summary>
+/// Filtre les catégories affichées selon le texte tapé.
+/// </summary>
+private void OnSearchTextChanged(string search)
+{
+    // Si la recherche est vide, on recharge tout normalement
+    if (string.IsNullOrWhiteSpace(search))
+    {
+        LoadAndCreateCategoryButtons();
+        return;
+    }
+
+    // Sinon on filtre selon le mode courant
+    string lower = search.Trim().ToLowerInvariant();
+    ClearExistingButtons();
+
+    switch (currentDisplayMode)
+    {
+        case CategoryDisplayMode.NiveauOnly:
+            foreach (var cat in allNiveauCategories
+                     .Where(c => c.TitreCategNiv != null &&
+                                 c.TitreCategNiv.ToLowerInvariant().Contains(lower)))
+            {
+                CreateNiveauCategoryButton(cat);
+            }
+            break;
+
+        case CategoryDisplayMode.TypeOnly:
+            foreach (var cat in allTypeCategories
+                     .Where(c => c.TitreCategTyp != null &&
+                                 c.TitreCategTyp.ToLowerInvariant().Contains(lower)))
+            {
+                CreateTypeCategoryButton(cat);
+            }
+            break;
+    }
+
+    // On force le layout
+    StartCoroutine(ForceLayoutRefresh());
+}
+
 
     void ValidateAndFixParentSetup()
     {
@@ -470,7 +548,7 @@ public class DynamicCategoryCreator : MonoBehaviour
         return categoryButtonPrefab != null && categoriesParent != null;
     }
 
-    // Méthodes de callback modifiées pour inclure le titre
+    // MÉTHODES MODIFIÉES : Incluent maintenant la mise à jour du bouton retour
     private void OnNiveauButtonClick(int categoryId, GameObject button)
     {
         UpdateSelectedButton(button);
@@ -479,6 +557,9 @@ public class DynamicCategoryCreator : MonoBehaviour
 
         // Récupérer le titre de la catégorie
         string categoryTitle = GetCategoryTitle(categoryId, true); // true pour niveau
+        
+        // NOUVEAU : Mettre à jour le bouton retour
+        UpdateBackButton(categoryTitle);
         
         OnNiveauCategorySelected?.Invoke(categoryId, categoryTitle);
     }
@@ -492,7 +573,19 @@ public class DynamicCategoryCreator : MonoBehaviour
         // Récupérer le titre de la catégorie
         string categoryTitle = GetCategoryTitle(categoryId, false); // false pour type
         
+        // NOUVEAU : Mettre à jour le bouton retour
+        UpdateBackButton(categoryTitle);
+        
         OnTypeCategorySelected?.Invoke(categoryId, categoryTitle);
+    }
+
+    // NOUVELLE MÉTHODE : Met à jour le texte du bouton retour
+    private void UpdateBackButton(string categoryTitle)
+    {
+        if (backButtonText != null)
+        {
+            backButtonText.text = categoryTitle;
+        }
     }
 
     private void UpdateSelectedButton(GameObject newSelectedButton)
