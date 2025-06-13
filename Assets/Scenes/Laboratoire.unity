@@ -1242,7 +1242,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   databaseName: chemistry_experiments.db
   forceRecreateDatabase: 0
-  createDatabaseOnStart: 0
+  createDatabaseOnStart: 1
   enableDebugLogs: 1
 --- !u!4 &771197383
 Transform:

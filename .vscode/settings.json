@@ -66,5 +66,5 @@
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj"
     },
-    "dotnet.defaultSolution": "Realite-Mixte-Chimie.sln"
+    "dotnet.defaultSolution": "Categorie screen.sln"
 }
